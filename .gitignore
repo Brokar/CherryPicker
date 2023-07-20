@@ -1,0 +1,16 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+
+# C extensions
+*.so
+
+# Environments
+.env
+.venv
+env/
+env-pygame/
+
+# swap and temp files
+*~
+*.swp
+*.swo
