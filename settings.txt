@@ -1,0 +1,12 @@
+
+
+FPS = 60
+
+
+
+class GameSettings:
+    def __init__(self, width, height):
+        self.width = width
+        self.height = height
+        self.tilei_size = height / 20 
+        self.game_map = WORLD_MAP
