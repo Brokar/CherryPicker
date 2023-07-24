@@ -11,6 +11,7 @@ class Game:
         infoObject = pygame.display.Info()
         # Initialize setting object
         self.settings = GameSettings(infoObject.current_w, infoObject.current_h) 
+        self.map = self.settings.initialise_map(map_length,map_height)
         # Generate a screen
         self.screen = pygame.display.set_mode(((self.settings.width-30), (self.settings.height-30)))
         self.clock = pygame.time.Clock()
@@ -19,16 +20,17 @@ class Game:
         pygame.display.set_caption('Cherry picker')
 
     def run(self):
-        map = initialise_map (3,map_length,map_height,5)
+        grass= pygame.image.load('Tiles\grass.png')
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
             self.screen.fill('black')
-            self.level.render_map()
+            self.level.render_map(self.screen,self.map)
             pygame.display.update()
             self.clock.tick(FPS)
+
 if __name__ == '__main__':
     game = Game()
     game.run()
