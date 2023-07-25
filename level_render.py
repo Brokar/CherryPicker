@@ -25,11 +25,8 @@ class LevelRender:
                 grass_patch = Grass ([x,y])
                 grasses.add(grass_patch)
                 if map[0][row_index][col_index]==1:
-                    lowcherrytree = LowCherryTree([x,y])
-                    upcherrytree = UpCherryTree([x,(y+1)])
-                    cherry_trees.add(lowcherrytree)
-                    cherry_trees.add(upcherrytree)
-        print (grasses)
+                    cherrytree = CherryTree([x,(y+tile_size)])
+                    cherry_trees.add(cherrytree)
         grasses.update()
         grasses.draw(screen)
         cherry_trees.update()
@@ -45,19 +42,13 @@ class Grass (pygame.sprite.Sprite):
     def __init__(self, position):
         # Get the display surface
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load('Tiles\grass.png')
-        self.rect = self.image.get_rect(topleft = (position[0], position[1]))
-
-class LowCherryTree (pygame.sprite.Sprite):
-    def __init__(self, position):
-        # Get the display surface
-        pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load('Tiles\lowbush.png').convert_alpha()
-        self.rect = self.image.get_rect(topleft = (position[0], position[1]))          
-
-class UpCherryTree (pygame.sprite.Sprite):
-    def __init__(self, position):
-        # Get the display surface
-        pygame.sprite.Sprite.__init__(self)
         self.image = pygame.image.load('Tiles\grass.png').convert_alpha()
+        self.rect = self.image.get_rect(topleft = (position[0], position[1]))
+         
+
+class CherryTree (pygame.sprite.Sprite):
+    def __init__(self, position):
+        # Get the display surface
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.image.load('Tiles\\fullbush.png').convert_alpha()
         self.rect = self.image.get_rect(topleft = (position[0], position[1]))        
