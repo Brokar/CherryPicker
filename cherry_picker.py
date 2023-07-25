@@ -16,18 +16,18 @@ class Game:
         self.screen = pygame.display.set_mode(((self.settings.width-30), (self.settings.height-30)))
         self.clock = pygame.time.Clock()
         # Initialize the rendering class
-        self.level = LevelRender()
+        self.level = LevelRender(self.screen,self.map)
         pygame.display.set_caption('Cherry picker')
 
     def run(self):
-        grass= pygame.image.load('Tiles\grass.png')
+        
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
             self.screen.fill('black')
-            self.level.render_map(self.screen,self.map)
+            self.level.update_map_render(self.screen,self.map)
             pygame.display.update()
             self.clock.tick(FPS)
 
