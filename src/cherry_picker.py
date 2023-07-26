@@ -1,5 +1,5 @@
 import pygame, sys
-from settings import *
+import settings  
 from level_render import *
 
 class Game:
@@ -8,14 +8,14 @@ class Game:
         pygame.init()
         # Get resolution of the screen
         infoObject = pygame.display.Info()
+        settings.init(infoObject.current_w, infoObject.current_h)
         # Initialize setting object
-        self.settings = GameSettings(infoObject.current_w, infoObject.current_h) 
         # Generate a screen
-        self.screen = pygame.display.set_mode((self.settings.width, self.settings.height))
+        self.screen = pygame.display.set_mode((settings.game_map.width, settings.game_map.height))
         self.clock = pygame.time.Clock()
         # Initialize the rendering class
-        self.level = LevelRender()
-        pygame.display.set_caption('Runner')
+        self.level = LevelRender(settings.game_map)
+        pygame.display.set_caption('CherryPicker')
     def run(self):
         while True:
             for event in pygame.event.get():
@@ -23,9 +23,9 @@ class Game:
                     pygame.quit()
                     sys.exit()
             self.screen.fill('black')
-            self.level.render_map()
+            self.level.update_map()
             pygame.display.update()
-            self.clock.tick(FPS)
+            self.clock.tick(settings.FPS)
 if __name__ == '__main__':
     game = Game()
     game.run()

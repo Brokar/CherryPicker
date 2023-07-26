@@ -1,4 +1,17 @@
 
+class GameMap:
+    def __init__(self, width, height):
+        self.width = width
+        self.height = height
+        self.tile_size = height / 20 
+        self.game_map = self.random_map()
+    
+    def random_map(self):
+        return WORLD_MAP
+
+    def get_matrix(self):
+        return self.game_map
+
 
 FPS = 60
 
@@ -25,10 +38,7 @@ WORLD_MAP = [ # To be randomized
 ['x',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','x'],
 ['x','x','x','x','x','x','x','x','x','x','x','x','x','x','x','x','x','x','x','x'],
 ]
-class GameSettings:
-    def __init__(self, width, height):
-        self.width = width
-        self.height = height
-        self.tilei_size = height / 20 
-        self.game_map = WORLD_MAP
 
+def init(width, height):
+    global game_map
+    game_map = GameMap(width, height) 
