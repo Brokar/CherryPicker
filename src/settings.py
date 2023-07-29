@@ -1,3 +1,10 @@
+from enum import Enum
+
+class GameStates(Enum):
+    PLAYER = 0
+    MOVING = 1
+    AI = 2
+
 
 class GameMap:
     def __init__(self, width, height):
@@ -38,6 +45,8 @@ WORLD_MAP = [ # To be randomized
 ['x',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','x'],
 ['x','x','x','x','x','x','x','x','x','x','x','x','x','x','x','x','x','x','x','x'],
 ]
+
+
 
 def init(width, height):
     global game_map
