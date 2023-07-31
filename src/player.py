@@ -8,16 +8,29 @@ class Player(pygame.sprite.Sprite):
         super().__init__(groups)
         self.image = pygame.image.load(path.join("..", "tiles", "player1front.png")).convert_alpha()
         self.rect = self.image.get_rect(topleft = pos)
-         
+        # Game position
+        self.position = pygame.math.Vector2(pos) 
+        # Direction for changing position
         self.direction = pygame.math.Vector2()
         self.speed = 1
         self.k_yet_press = False
         self.obstacle_sprites = obstacle_sprites
+
+    def set_pos(self, pos):
+        self.position = pos
     
+    def get_pos(self):
+        return self.position
+    
+    def reset_pos(self):
+        self.rect.x = int(self.position.x)
+        self.rect.y = int(self.position.y)
+
     def input(self):
         keys = pygame.key.get_pressed()
         self.direction.x = 0
         self.direction.y = 0
+        # Debounce check
         if keys[pygame.K_UP] or keys[pygame.K_DOWN] or keys[pygame.K_RIGHT] or keys[pygame.K_LEFT]:
             if not self.k_yet_press:
                 if keys[pygame.K_UP]:
