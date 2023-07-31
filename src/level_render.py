@@ -39,6 +39,8 @@ class LevelRender:
                     self.state = settings.GameStates.MOVING
                     self.start_state_ticks=pygame.time.get_ticks()
                     self.player.reset_pos()
+                if keys[pygame.K_SPACE]:
+                    self.player.reset_pos()
                 self.k_space_is_press=True
         else:
             self.k_space_is_press=False
