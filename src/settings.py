@@ -10,7 +10,7 @@ class GameMap:
     def __init__(self, width, height):
         self.width = width
         self.height = height
-        self.tile_size = height / 20 
+        self.tile_size = 32 
         self.game_map = self.random_map()
     
     def random_map(self):

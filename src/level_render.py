@@ -61,13 +61,13 @@ class LevelRender:
             self.visible_sprites.custom_draw(self.player)
             #self.visible_sprites.update()
             seconds=(pygame.time.get_ticks()-self.start_state_ticks)/1000
-            debug(str(f"{self.state}: {str(int(10-seconds))}"))
+            debug(f"{self.state}: {str(int(10-seconds))}")
             if seconds>10:
                 self.state = settings.GameStates.PLAYER
 
 
           
-
+# TODO: free camara. Allow following other sprites
 class YSortCameraGroup(pygame.sprite.Group):
     def __init__(self):
 
@@ -77,12 +77,19 @@ class YSortCameraGroup(pygame.sprite.Group):
         self.half_width = self.display_surface.get_size()[0] // 2
         self.half_height = self.display_surface.get_size()[1] // 2
         self.camara_off = pygame.math.Vector2()
+        self.input_camera = pygame.math.Vector2()
+        self.free_camera = False
 
     def custom_draw(self,player):
-
+        CAMERA_SPEED = 5
         # Camara follows the player 
-        self.camara_off.x = player.rect.centerx - self.half_width
-        self.camara_off.y = player.rect.centery - self.half_height
+        if not self.free_camera:
+            self.camara_off.x = player.rect.centerx - self.half_width
+            self.camara_off.y = player.rect.centery - self.half_height
+
+        else: 
+            self.camara_off.x += self.input_camera.x * CAMERA_SPEED 
+            self.camara_off.y += self.input_camera.y * CAMERA_SPEED
         self.draw_background(settings.game_map)
         # for all sprites in the group, draw with camara_off
         for sprite in sorted(self.sprites(),key = lambda sprite: sprite.rect.centery):
@@ -100,4 +107,25 @@ class YSortCameraGroup(pygame.sprite.Group):
                 grass = Grass((x,y))
                 display_surface.blit(grass.image, grass.rect.topleft - self.camara_off)
 
+    def input(self):
+        keys = pygame.key.get_pressed()
+        self.input_camera.x = 0
+        self.input_camera.y = 0
+        # Debounce check
+        if keys[pygame.K_w] or keys[pygame.K_s] or keys[pygame.K_d] or keys[pygame.K_a] or keys[pygame.K_p]:
+            self.free_camera=True
+            if keys[pygame.K_w]:
+                self.input_camera.y = -1
+            elif keys[pygame.K_s]:
+                self.input_camera.y = 1 
+
+            if keys[pygame.K_d]:
+                self.input_camera.x = 1 
+            elif keys[pygame.K_a]:
+                self.input_camera.x = -1
+            if keys[pygame.K_p]:
+                self.free_camera=False
+    def update(self):
+        super().update()
+        self.input()
 
