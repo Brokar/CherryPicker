@@ -8,7 +8,7 @@ class Bot:
     def __init__(self): 
         self.position=[]
 
-    def random_move(self, map):
+    def random_move(self):
         map[3,self.position[0],self.position[1]]-=1
         #remove possibilities for edge of map
         possibilities=["right","left","up","down"]

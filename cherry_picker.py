@@ -11,12 +11,13 @@ class Game:
         infoObject = pygame.display.Info()
         # Initialize setting object
         self.settings = GameSettings(infoObject.current_w, infoObject.current_h) 
-        self.map = self.settings.initialise_map(map_length,map_height)
+        #self.settings.initialise_map(map_length,map_height)
+
         # Generate a screen
         self.screen = pygame.display.set_mode(((self.settings.width-30), (self.settings.height-30)))
         self.clock = pygame.time.Clock()
         # Initialize the rendering class
-        self.level = LevelRender(self.screen,self.map)
+        self.level = LevelRender(self.screen)
         pygame.display.set_caption('Cherry picker')
 
     def run(self):
@@ -27,7 +28,7 @@ class Game:
                     pygame.quit()
                     sys.exit()
             self.screen.fill('black')
-            self.level.update_map_render(self.screen,self.map)
+            self.level.update_map_render(self.screen)
             pygame.display.update()
             self.clock.tick(FPS)
 
