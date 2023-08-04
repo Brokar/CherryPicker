@@ -7,6 +7,7 @@ class Player(pygame.sprite.Sprite):
 
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.image.load('Tiles\\player1front.png').convert_alpha()
+
         self.rect = self.image.get_rect(topleft = (position[0], position[1]))
         self.direction = pygame.math.Vector2()
         self.speed = 1
@@ -18,10 +19,19 @@ class Player(pygame.sprite.Sprite):
         self.k_yet_press = False
         self.obstacle_sprites = obstacle_sprites
         self.contact_dict = {"trees":[],"obstacle":[]}
-        self.number_cherries = 0
 
 
-    def input(self):
+        basket_image = pygame.image.load('Tiles\\box.png').convert_alpha()
+        self.cherry_image = pygame.image.load('Tiles\\cherry.png').convert_alpha()
+        self.basket_content_position=[(0,35,60,60),(0,65,60,60)]
+        self.basket_image = pygame.transform.scale(basket_image,(80,80))
+        self.display_surface = pygame.display.get_surface()
+        self.basket_rect = self.basket_image.get_rect(topleft = (0, map_height*tile_size))         
+        self.basket_content = []
+        self.basket()
+
+
+    def input(self,obstacle_sprites):
         
         keys = pygame.key.get_pressed()
         # Movement Input
@@ -43,7 +53,7 @@ class Player(pygame.sprite.Sprite):
                     self.direction[:] = -1,0
                     self.status = "left"
                 elif keys [pygame.K_SPACE] and self.contact_dict["trees"]:
-                    self.pick()
+                    self.pick(obstacle_sprites)
                 self.k_yet_press=True
                 
         else:
@@ -84,7 +94,13 @@ class Player(pygame.sprite.Sprite):
 
 
 
-    def pick(self):
+    def pick(self,obstacle_sprites):
+        inflated=self.rect.inflate(4,4)
+        for sprites in obstacle_sprites:
+            if inflated.colliderect(sprites.rect):
+                if sprites.fruit=="cherry":
+                    self.basket_content.append(sprites.fruit)
+                    sprites.empty_tree()
         pass
 
     def import_player_assets(self):
@@ -139,12 +155,21 @@ class Player(pygame.sprite.Sprite):
             self.contact_dict["obstacle"].append("left")
         elif map[0][yposition_matrix][(xposition_matrix-1)]==1:
             self.contact_dict["trees"].append("left")
+
+    def basket(self):
+        self.display_surface.blit(self.basket_image, self.basket_rect, special_flags= pygame.BLEND_ADD)
+        print(self.basket_content)
+        for fruit_index, fruit in enumerate(self.basket_content):
+            self.display_surface.blit(self.cherry_image, self.basket_content_position[fruit_index], special_flags= pygame.BLEND_ADD)
+
+   
         
 
-    def update(self):
+    def update(self,obstacle_sprites):
         #self.input_diagonale()
         self.contact()
-        self.input()
+        self.input(obstacle_sprites)
         self.get_status()
         self.animate()
         self.move()
+        self.basket()

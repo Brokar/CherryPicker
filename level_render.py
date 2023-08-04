@@ -16,6 +16,8 @@ class LevelRender:
         self.grasses = pygame.sprite.Group()
         self.initialise_map_render(screen)
 
+
+
     def initialise_map_render(self, screen):
         # update and draw the map in the screen
         # Render obstacles
@@ -36,7 +38,7 @@ class LevelRender:
         self.grasses.draw(screen)
         self.obstacle_sprites.update()
         self.obstacle_sprites.draw(screen)
-        self.visible_player.update()
+        self.visible_player.update(self.obstacle_sprites)
         self.visible_player.draw(screen)
         # Render interact_obj and player
         pass
@@ -46,8 +48,10 @@ class LevelRender:
         self.grasses.draw(screen)
         self.obstacle_sprites.update()
         self.obstacle_sprites.draw(screen)
-        self.visible_player.update()
+        self.visible_player.update(self.obstacle_sprites)
         self.visible_player.draw(screen)
+
+
 
 class Grass (pygame.sprite.Sprite):
     def __init__(self, position):
@@ -65,5 +69,6 @@ class CherryTree (pygame.sprite.Sprite):
         self.rect = self.image.get_rect(topleft = (position[0], position[1]))  
         self.fruit = "cherry"  
     def empty_tree(self):
-        if self.fruit == "empty":
-            self.image = pygame.image.load('Tiles\\emptybush.png').convert_alpha()
+        self.fruit = "empty"
+        self.image = pygame.image.load('Tiles\\emptybush.png').convert_alpha()
+
