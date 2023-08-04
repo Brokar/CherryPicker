@@ -26,5 +26,5 @@ pip install -r requirements.txt
 ## Run program
 
 ```
-python3 cherry_picker.py
+python3 src/cherry_picker.py
 ```
