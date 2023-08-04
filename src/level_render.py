@@ -1,6 +1,6 @@
 import pygame
 import settings
-from tile import Grass, Object
+from tile import Grass, CherryTree
 from player import Player#, interact_obj
 from debug import debug
 class LevelRender:
@@ -21,14 +21,14 @@ class LevelRender:
         self.init_map(game_map)
         self.state = settings.GameStates.PLAYER
     def init_map(self, game_map):
-        for row_index,row in enumerate(game_map.get_matrix()):
+        for row_index, row in enumerate(game_map.game_map[0]):
             for col_index, col in enumerate(row):
-                x = col_index * game_map.tile_size
-                y = row_index * game_map.tile_size
-                if col == 'x':
-                    # Creating objects with groups to be assigned to 
-                    Object((x,y),[self.visible_sprites,self.obstacle_sprites])
-                if col == 'p':
+                x = col_index*game_map.tile_size
+                y = row_index*game_map.tile_size
+                if game_map.game_map[0][row_index][col_index]==1:
+                    #                    cherrytree = CherryTree([x,(y-tile_size)])
+                    CherryTree((x,y),[self.visible_sprites,self.obstacle_sprites])
+                if game_map.game_map[2][row_index][col_index]==1:
                     self.player = Player((x,y),[self.visible_sprites],self.obstacle_sprites ) 
     def update_game_state(self):
         keys = pygame.key.get_pressed()

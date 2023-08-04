@@ -11,7 +11,7 @@ class Game:
         settings.init(infoObject.current_w, infoObject.current_h)
         # Initialize setting object
         # Generate a screen
-        self.screen = pygame.display.set_mode((settings.game_map.width, settings.game_map.height))
+        self.screen = pygame.display.set_mode((settings.game_map.screen_width-5, settings.game_map.screen_height-20))
         self.clock = pygame.time.Clock()
         # Initialize the rendering class
         self.level = LevelRender(settings.game_map)
