@@ -17,9 +17,10 @@ class LevelRender:
         # State control
         self.start_state_ticks = 0
         # sprite group setup
+        self.background_tiles = pygame.sprite.Group()
+        self.visible_sprites = YSortCameraGroup()
         self.obstacle_sprites = pygame.sprite.Group()
-        self.player_references = []
-        self.background_tiles = YSortCameraGroup()
+        self.player_references = []        
         self.init_map(game_map)
         self.state = settings.GameStates.PLAYER
 
@@ -62,11 +63,12 @@ class LevelRender:
         # Updating all visable sprites, including user
         #self.background_tiles.custom_draw()
         self.update_game_state()
-        self.background_tiles.custom_draw(self.player)
+        self.visible_sprites.custom_draw(self.player,self.background_tiles)
         if self.state == settings.GameStates.PLAYER:
             debug(str(f"{self.state}"))
-            self.visible_sprites.custom_draw(self.player)
             self.visible_sprites.update()
+            self.visible_sprites.custom_draw(self.player,self.background_tiles)
+            
         elif self.state == settings.GameStates.MOVING:
             self.visible_sprites.custom_draw(self.player)
             #self.visible_sprites.update()
@@ -90,7 +92,7 @@ class YSortCameraGroup(pygame.sprite.Group):
         self.input_camera = pygame.math.Vector2()
         self.free_camera = False
 
-    def custom_draw(self,player):
+    def custom_draw(self,player,background):
         CAMERA_SPEED = 10
         # Camara follows the player 
         if not self.free_camera:
@@ -102,6 +104,9 @@ class YSortCameraGroup(pygame.sprite.Group):
             self.camara_off.y += self.input_camera.y * CAMERA_SPEED
         #self.draw_background(settings.game_map)
         # for all sprites in the group, draw with camara_off
+        for sprite in sorted(background,key = lambda sprite: sprite.rect.centery):
+            offset_pos = sprite.rect.topleft - self.camara_off
+            self.display_surface.blit(sprite.image, offset_pos)
         for sprite in sorted(self.sprites(),key = lambda sprite: sprite.rect.centery):
             offset_pos = sprite.rect.topleft - self.camara_off
             self.display_surface.blit(sprite.image, offset_pos)
