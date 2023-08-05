@@ -17,22 +17,18 @@ class LevelRender:
         # State control
         self.start_state_ticks = 0
         # sprite group setup
-        self.visible_sprites = YSortCameraGroup()
         self.obstacle_sprites = pygame.sprite.Group()
-<<<<<<< HEAD
         self.player_references = []
-=======
         self.background_tiles = YSortCameraGroup()
->>>>>>> 75a8e97f5dd77269febc40b2644426227e799a9b
         self.init_map(game_map)
         self.state = settings.GameStates.PLAYER
 
     def init_map(self, game_map):
-<<<<<<< HEAD
         for row_index, row in enumerate(game_map.obstacles_map):
             for col_index, col in enumerate(row):
                 x = col_index*game_map.tile_size
                 y = row_index*game_map.tile_size
+                Grass((x,y),self.background_tiles)
                 if game_map.obstacles_map[row_index][col_index]!=0:
                     CherryTree((x,y),[self.visible_sprites,self.obstacle_sprites])
                 if game_map.players_map[row_index][col_index]!=0:
@@ -41,18 +37,7 @@ class LevelRender:
                         self.player = Player((x,y),[self.visible_sprites],self.obstacle_sprites,game_map.players_map[row_index][col_index]) 
                         self.player_references.append(self.player)
 
-=======
-        for row_index, row in enumerate(game_map.map[0]):
-            for col_index, col in enumerate(row):
-                x = col_index*game_map.tile_size
-                y = row_index*game_map.tile_size
-                Grass((x,y),self.background_tiles)
-                if game_map.map[0][row_index][col_index]==1:
-                    #                    cherrytree = CherryTree([x,(y-tile_size)])
-                    CherryTree((x,y),[self.visible_sprites,self.obstacle_sprites])
-                if game_map.map[2][row_index][col_index]==1:
-                    self.player = Player((x,y),[self.visible_sprites],self.obstacle_sprites ) 
->>>>>>> 75a8e97f5dd77269febc40b2644426227e799a9b
+
     def update_game_state(self):
         keys = pygame.key.get_pressed()
         # Debounce check

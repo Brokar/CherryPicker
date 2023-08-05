@@ -128,7 +128,6 @@ class Player(pygame.sprite.Sprite):
         #x and y order is inverted in the settings.game_map.game_map
         xposition_matrix=int(self.position[0]/settings.game_map.tile_size)
         yposition_matrix=int(self.position[1]/settings.game_map.tile_size)
-<<<<<<< HEAD
         self.contact_dict = {"up":"","down":"", "left":"", "right":""}
         if yposition_matrix==settings.game_map.map_height-1:
             self.contact_dict["down"]="obstacle"
@@ -147,25 +146,6 @@ class Player(pygame.sprite.Sprite):
         elif settings.game_map.obstacles_map[yposition_matrix][(xposition_matrix-1)]!=0:
             self.contact_dict["left"]="trees"
 
-=======
-        self.contact_dict = {"trees":[],"obstacle":[]}
-        if yposition_matrix==len(settings.game_map.map[0])-1:
-            self.contact_dict["obstacle"].append("down")
-        elif settings.game_map.map[0][(yposition_matrix+1)][xposition_matrix]==1:
-            self.contact_dict["trees"].append("down")
-        if yposition_matrix==0:
-            self.contact_dict["obstacle"].append("up")
-        elif settings.game_map.map[0][(yposition_matrix-1)][xposition_matrix]==1:
-            self.contact_dict["trees"].append("up")
-        if xposition_matrix==len(settings.game_map.map[0][0])-1:
-            self.contact_dict["obstacle"].append("right")
-        elif settings.game_map.map[0][yposition_matrix][(xposition_matrix+1)]==1:
-            self.contact_dict["trees"].append("right")
-        if xposition_matrix==0:
-            self.contact_dict["obstacle"].append("left")
-        elif settings.game_map.map[0][yposition_matrix][(xposition_matrix-1)]==1:
-            self.contact_dict["trees"].append("left")
->>>>>>> 75a8e97f5dd77269febc40b2644426227e799a9b
 
     def update(self):
         self.contact()
