@@ -16,7 +16,7 @@ class GameMap:
         self.map_height=20
         self.number_of_cherries=5
         self.tile_size = 32 
-        self.game_map = self.random_map()
+        self.map = self.random_map()
     
     def random_map(self):
         #layer0=terrain,layer1=player1,layer2=bot
@@ -31,7 +31,7 @@ class GameMap:
         return map
 
     def get_matrix(self):
-        return self.game_map[0]
+        return self.map[0]
 
 
 FPS = 60

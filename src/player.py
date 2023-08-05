@@ -61,10 +61,9 @@ class Player(pygame.sprite.Sprite):
     def move(self,speed):
 
         self.rect.topleft += self.direction * speed * settings.game_map.tile_size 
-        settings.game_map.game_map[2][int(self.position[1]/settings.game_map.tile_size)][int(self.position[0]/settings.game_map.tile_size)]-=1
+        settings.game_map.map[2][int(self.position[1]/settings.game_map.tile_size)][int(self.position[0]/settings.game_map.tile_size)]-=1
         self.position += self.direction * speed * settings.game_map.tile_size
-        settings.game_map.game_map[2][int(self.position[1]/settings.game_map.tile_size)][int(self.position[0]/settings.game_map.tile_size)]+=1
-        print(self.direction)
+        settings.game_map.map[2][int(self.position[1]/settings.game_map.tile_size)][int(self.position[0]/settings.game_map.tile_size)]+=1
 
     def pick(self,obstacle_sprites):
         inflated=self.rect.inflate(4,4)
@@ -114,7 +113,7 @@ class Player(pygame.sprite.Sprite):
         self.frame_index += self.animation_speed
         if self.frame_index >= len(animation):
             self.frame_index = 0
-        pygame.time.wait(50)
+        pygame.time.wait(30)
         # Set the image
         self.image = animation[int(self.frame_index)]
         #to add intermadiate position for animation
@@ -125,21 +124,21 @@ class Player(pygame.sprite.Sprite):
         xposition_matrix=int(self.position[0]/settings.game_map.tile_size)
         yposition_matrix=int(self.position[1]/settings.game_map.tile_size)
         self.contact_dict = {"trees":[],"obstacle":[]}
-        if yposition_matrix==len(settings.game_map.game_map[0])-1:
+        if yposition_matrix==len(settings.game_map.map[0])-1:
             self.contact_dict["obstacle"].append("down")
-        elif settings.game_map.game_map[0][(yposition_matrix+1)][xposition_matrix]==1:
+        elif settings.game_map.map[0][(yposition_matrix+1)][xposition_matrix]==1:
             self.contact_dict["trees"].append("down")
         if yposition_matrix==0:
             self.contact_dict["obstacle"].append("up")
-        elif settings.game_map.game_map[0][(yposition_matrix-1)][xposition_matrix]==1:
+        elif settings.game_map.map[0][(yposition_matrix-1)][xposition_matrix]==1:
             self.contact_dict["trees"].append("up")
-        if xposition_matrix==len(settings.game_map.game_map[0][0])-1:
+        if xposition_matrix==len(settings.game_map.map[0][0])-1:
             self.contact_dict["obstacle"].append("right")
-        elif settings.game_map.game_map[0][yposition_matrix][(xposition_matrix+1)]==1:
+        elif settings.game_map.map[0][yposition_matrix][(xposition_matrix+1)]==1:
             self.contact_dict["trees"].append("right")
         if xposition_matrix==0:
             self.contact_dict["obstacle"].append("left")
-        elif settings.game_map.game_map[0][yposition_matrix][(xposition_matrix-1)]==1:
+        elif settings.game_map.map[0][yposition_matrix][(xposition_matrix-1)]==1:
             self.contact_dict["trees"].append("left")
 
     def update(self):

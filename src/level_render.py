@@ -18,17 +18,19 @@ class LevelRender:
         # sprite group setup
         self.visible_sprites = YSortCameraGroup()
         self.obstacle_sprites = pygame.sprite.Group()
+        self.background_tiles = YSortCameraGroup()
         self.init_map(game_map)
         self.state = settings.GameStates.PLAYER
     def init_map(self, game_map):
-        for row_index, row in enumerate(game_map.game_map[0]):
+        for row_index, row in enumerate(game_map.map[0]):
             for col_index, col in enumerate(row):
                 x = col_index*game_map.tile_size
                 y = row_index*game_map.tile_size
-                if game_map.game_map[0][row_index][col_index]==1:
+                Grass((x,y),self.background_tiles)
+                if game_map.map[0][row_index][col_index]==1:
                     #                    cherrytree = CherryTree([x,(y-tile_size)])
                     CherryTree((x,y),[self.visible_sprites,self.obstacle_sprites])
-                if game_map.game_map[2][row_index][col_index]==1:
+                if game_map.map[2][row_index][col_index]==1:
                     self.player = Player((x,y),[self.visible_sprites],self.obstacle_sprites ) 
     def update_game_state(self):
         keys = pygame.key.get_pressed()
@@ -52,7 +54,9 @@ class LevelRender:
         # 3. AI turn
         # 4. Other stuff in the map
         # Updating all visable sprites, including user
+        #self.background_tiles.custom_draw()
         self.update_game_state()
+        self.background_tiles.custom_draw(self.player)
         if self.state == settings.GameStates.PLAYER:
             debug(str(f"{self.state}"))
             self.visible_sprites.custom_draw(self.player)
@@ -81,7 +85,7 @@ class YSortCameraGroup(pygame.sprite.Group):
         self.free_camera = False
 
     def custom_draw(self,player):
-        CAMERA_SPEED = 5
+        CAMERA_SPEED = 10
         # Camara follows the player 
         if not self.free_camera:
             self.camara_off.x = player.rect.centerx - self.half_width
@@ -90,22 +94,22 @@ class YSortCameraGroup(pygame.sprite.Group):
         else: 
             self.camara_off.x += self.input_camera.x * CAMERA_SPEED 
             self.camara_off.y += self.input_camera.y * CAMERA_SPEED
-        self.draw_background(settings.game_map)
+        #self.draw_background(settings.game_map)
         # for all sprites in the group, draw with camara_off
         for sprite in sorted(self.sprites(),key = lambda sprite: sprite.rect.centery):
             offset_pos = sprite.rect.topleft - self.camara_off
             self.display_surface.blit(sprite.image, offset_pos)
 
 
-    def draw_background(self, game_map):
-        # TODO: Change to a less complex rendering
-        for row_index,row in enumerate(game_map.get_matrix()):
-            for col_index, col in enumerate(row):
-                display_surface = pygame.display.get_surface()
-                x = col_index * game_map.tile_size
-                y = row_index * game_map.tile_size
-                grass = Grass((x,y))
-                display_surface.blit(grass.image, grass.rect.topleft - self.camara_off)
+#    def draw_background(self, game_map):
+#        # TODO: Change to a less complex rendering
+#        for row_index,row in enumerate(game_map.get_matrix()):
+#            for col_index, col in enumerate(row):
+#                display_surface = pygame.display.get_surface()
+#                x = col_index * game_map.tile_size
+#                y = row_index * game_map.tile_size
+#                grass = Grass((x,y))
+#                display_surface.blit(grass.image, grass.rect.topleft - self.camara_off)
 
     def input(self):
         keys = pygame.key.get_pressed()
