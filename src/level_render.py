@@ -3,6 +3,7 @@ import settings
 from tile import Grass, CherryTree
 from player import Player#, interact_obj
 from debug import debug
+
 class LevelRender:
     """ This class is incharge of rendering the game level 
         using pygame framework. Normally, it will be updated
@@ -18,18 +19,23 @@ class LevelRender:
         # sprite group setup
         self.visible_sprites = YSortCameraGroup()
         self.obstacle_sprites = pygame.sprite.Group()
+        self.player_references = []
         self.init_map(game_map)
         self.state = settings.GameStates.PLAYER
+
     def init_map(self, game_map):
-        for row_index, row in enumerate(game_map.game_map[0]):
+        for row_index, row in enumerate(game_map.obstacles_map):
             for col_index, col in enumerate(row):
                 x = col_index*game_map.tile_size
                 y = row_index*game_map.tile_size
-                if game_map.game_map[0][row_index][col_index]==1:
-                    #                    cherrytree = CherryTree([x,(y-tile_size)])
+                if game_map.obstacles_map[row_index][col_index]!=0:
                     CherryTree((x,y),[self.visible_sprites,self.obstacle_sprites])
-                if game_map.game_map[2][row_index][col_index]==1:
-                    self.player = Player((x,y),[self.visible_sprites],self.obstacle_sprites ) 
+                if game_map.players_map[row_index][col_index]!=0:
+                    #(position, [added to sprite group], passing obstacle_sprites, giving reference)
+                    if game_map.players_map[row_index][col_index]==1:
+                        self.player = Player((x,y),[self.visible_sprites],self.obstacle_sprites,game_map.players_map[row_index][col_index]) 
+                        self.player_references.append(self.player)
+
     def update_game_state(self):
         keys = pygame.key.get_pressed()
         # Debounce check
@@ -99,13 +105,15 @@ class YSortCameraGroup(pygame.sprite.Group):
 
     def draw_background(self, game_map):
         # TODO: Change to a less complex rendering
-        for row_index,row in enumerate(game_map.get_matrix()):
+        for row_index,row in enumerate(game_map.obstacles_map):
             for col_index, col in enumerate(row):
                 display_surface = pygame.display.get_surface()
                 x = col_index * game_map.tile_size
                 y = row_index * game_map.tile_size
                 grass = Grass((x,y))
                 display_surface.blit(grass.image, grass.rect.topleft - self.camara_off)
+
+
 
     def input(self):
         keys = pygame.key.get_pressed()
@@ -125,6 +133,7 @@ class YSortCameraGroup(pygame.sprite.Group):
                 self.input_camera.x = -1
             if keys[pygame.K_p]:
                 self.free_camera=False
+
     def update(self):
         super().update()
         self.input()
