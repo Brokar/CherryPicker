@@ -16,7 +16,9 @@ class GameMap:
         self.map_height=20
         self.number_of_cherries=5
         self.tile_size = 32 
+
         [self.obstacles_map,self.players_map] = self.random_map()
+
     
     def random_map(self):
         #layer0=terrain,layer1=player1,layer2=bot
@@ -30,6 +32,7 @@ class GameMap:
         for sample_number in range (self.number_of_cherries):
             obstacles_map[y_sample[sample_number],x_sample[sample_number]] = sample_number+1
         return [obstacles_map,players_map]
+
 
 
 
