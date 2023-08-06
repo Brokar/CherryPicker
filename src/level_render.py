@@ -94,7 +94,6 @@ class YSortCameraGroup(pygame.sprite.Group):
         self.input_camera = pygame.math.Vector2()
         self.free_camera = False
 
-
         self.cherry_image = pygame.image.load(path.join("..","tiles","cherry.png")).convert_alpha()
         self.cherry_image = pygame.transform.scale(self.cherry_image,(80,80))
     def custom_draw(self,player):
