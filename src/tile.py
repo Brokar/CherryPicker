@@ -13,11 +13,7 @@ class CherryTree(pygame.sprite.Sprite):
         self.fruit = "empty"
         self.image = pygame.image.load(path.join("..","tiles","emptybush.png")).convert_alpha()
 
-class Bot(pygame.sprite.Sprite):
-    def __init__(self,pos,groups):
-        super().__init__(groups)
-        self.image = pygame.image.load(path.join("..", "tiles", "lowbush.png")).convert_alpha()
-        self.rect = self.image.get_rect(topleft = pos)
+
 
 class Grass(pygame.sprite.Sprite):
     def __init__(self,pos, groups):
@@ -26,3 +22,4 @@ class Grass(pygame.sprite.Sprite):
         tile_size = settings.game_map.tile_size
         self.image = pygame.transform.scale(image, (tile_size, tile_size))
         self.rect = self.image.get_rect(topleft = pos)
+

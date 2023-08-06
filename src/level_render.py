@@ -4,6 +4,7 @@ from tile import Grass, CherryTree
 from player import Player#, interact_obj
 from debug import debug
 from os import path
+from bot import Bot
 
 class LevelRender:
     """ This class is incharge of rendering the game level 
@@ -21,9 +22,11 @@ class LevelRender:
         self.background_tiles = YSortCameraGroup()
         self.visible_sprites = YSortCameraGroup()
         self.obstacle_sprites = pygame.sprite.Group()
-        self.player_references = []        
+        self.player_references = []
+        self.obstacle_references = [] 
+        self.state = ["player"]     
         self.init_map(game_map)
-        self.state = settings.GameStates.PLAYER
+        
 
     def init_map(self, game_map):
         for row_index, row in enumerate(game_map.obstacles_map):
@@ -32,28 +35,32 @@ class LevelRender:
                 y = row_index*game_map.tile_size
                 Grass((x,y),self.background_tiles)
                 if game_map.obstacles_map[row_index][col_index]!=0:
-                    CherryTree((x,y),[self.visible_sprites,self.obstacle_sprites])
+                    self.obstacle_references.append(CherryTree((x,y),[self.visible_sprites,self.obstacle_sprites]))
+
                 if game_map.players_map[row_index][col_index]!=0:
                     #(position, [added to sprite group], passing obstacle_sprites, giving reference)
                     if game_map.players_map[row_index][col_index]==1:
-                        self.player = Player((x,y),[self.visible_sprites],self.obstacle_sprites,game_map.players_map[row_index][col_index]) 
+                        self.player = Player((x,y),[self.visible_sprites],self.obstacle_references,game_map.players_map[row_index][col_index],self.state,"player") 
                         self.player_references.append(self.player)
+                    if game_map.players_map[row_index][col_index]==2:
+                        self.adversary = Player((x,y),[self.visible_sprites],self.obstacle_references,game_map.players_map[row_index][col_index],self.state,"bot") 
+                        self.player_references.append(self.adversary)
 
 
-    def update_game_state(self):
-        keys = pygame.key.get_pressed()
-        # Debounce check
-        if keys[pygame.K_SPACE] or keys[pygame.K_RETURN]: 
-            if not self.k_space_is_press:
-                if keys[pygame.K_RETURN]:
-                    self.state = settings.GameStates.MOVING
-                    self.start_state_ticks=pygame.time.get_ticks()
-                    self.player.reset_pos()
-                if keys[pygame.K_SPACE]:
-                    self.player.reset_pos()
-                self.k_space_is_press=True
-        else:
-            self.k_space_is_press=False
+    # def update_game_state(self):
+    #     keys = pygame.key.get_pressed()
+    #     # Debounce check
+    #     if keys[pygame.K_SPACE] or keys[pygame.K_RETURN]: 
+    #         if not self.k_space_is_press:
+    #             if keys[pygame.K_RETURN]:
+    #                 self.state = settings.GameStates.MOVING
+    #                 self.start_state_ticks=pygame.time.get_ticks()
+    #                 self.player.reset_pos()
+    #             if keys[pygame.K_SPACE]:
+    #                 self.player.reset_pos()
+    #             self.k_space_is_press=True
+    #     else:
+    #         self.k_space_is_press=False
 
     def update_map(self):
         # TODO: define game stages. 
@@ -63,21 +70,23 @@ class LevelRender:
         # 4. Other stuff in the map
         # Updating all visable sprites, including user
         #self.background_tiles.custom_draw()
-        self.update_game_state()
+        # self.update_game_state()
         self.background_tiles.update()
         self.background_tiles.custom_draw(self.player)
-        if self.state == settings.GameStates.PLAYER:
-            debug(str(f"{self.state}"))
-            self.visible_sprites.update()
-            self.visible_sprites.custom_draw(self.player)
+        self.state = self.visible_sprites.update()
+        self.visible_sprites.custom_draw(self.player)
+        # if self.state == settings.GameStates.PLAYER:
+        debug(str(f"{self.state}"))
+        #     self.visible_sprites.update()
+        #     self.visible_sprites.custom_draw(self.player)
             
-        elif self.state == settings.GameStates.MOVING:
-            self.visible_sprites.custom_draw(self.player)
-            #self.visible_sprites.update()
-            seconds=(pygame.time.get_ticks()-self.start_state_ticks)/1000
-            debug(f"{self.state}: {str(int(10-seconds))}")
-            if seconds>10:
-                self.state = settings.GameStates.PLAYER
+        # elif self.state == settings.GameStates.MOVING:
+        #     self.visible_sprites.custom_draw(self.player)
+        #     #self.visible_sprites.update()
+        #     seconds=(pygame.time.get_ticks()-self.start_state_ticks)/1000
+        #     debug(f"{self.state}: {str(int(10-seconds))}")
+        #     if seconds>10:
+        #         self.state = settings.GameStates.PLAYER
 
 
           
@@ -96,13 +105,11 @@ class YSortCameraGroup(pygame.sprite.Group):
 
 
 
+
         self.cherry_image = pygame.image.load(path.join("..","tiles","cherry.png")).convert_alpha()
         self.cherry_image = pygame.transform.scale(self.cherry_image,(80,80))
 
     def custom_draw(self,player):
-
-
-
 
         CAMERA_SPEED = 10
         # Camara follows the player 
@@ -169,4 +176,6 @@ class YSortCameraGroup(pygame.sprite.Group):
     def update(self):
         super().update()
         self.input()
+
+
 
