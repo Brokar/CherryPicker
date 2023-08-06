@@ -3,6 +3,7 @@ import settings
 from tile import Grass, CherryTree
 from player import Player#, interact_obj
 from debug import debug
+from os import path
 
 class LevelRender:
     """ This class is incharge of rendering the game level 
@@ -92,6 +93,9 @@ class YSortCameraGroup(pygame.sprite.Group):
         self.input_camera = pygame.math.Vector2()
         self.free_camera = False
 
+
+        self.cherry_image = pygame.image.load(path.join("..","tiles","cherry.png")).convert_alpha()
+        self.cherry_image = pygame.transform.scale(self.cherry_image,(80,80))
     def custom_draw(self,player,background):
         CAMERA_SPEED = 10
         # Camara follows the player 
@@ -110,8 +114,27 @@ class YSortCameraGroup(pygame.sprite.Group):
         for sprite in sorted(self.sprites(),key = lambda sprite: sprite.rect.centery):
             offset_pos = sprite.rect.topleft - self.camara_off
             self.display_surface.blit(sprite.image, offset_pos)
+        self.user_interface(player)
+
+    def user_interface(self,player):
+        top=settings.game_map.map_height*settings.game_map.tile_size
 
 
+        cherry_rect = self.cherry_image.get_rect(topleft=(10,top+10))
+
+
+        cherry_number=player.basket_content.count("cherry")
+        text_cherry="X "+str(cherry_number)
+        self.font = pygame.font.Font(pygame.font.get_default_font(), 20)
+        text_surf = self.font.render(text_cherry, False, "white")
+        text_rect = text_surf.get_rect(topleft=cherry_rect.topright)
+
+
+        box_width=cherry_rect.width+text_rect.width+20
+        interface_rect=(0,top,box_width,cherry_rect.height+20)
+        pygame.draw.rect(self.display_surface,"royalblue",interface_rect)
+        self.display_surface.blit(self.cherry_image,cherry_rect)
+        self.display_surface.blit(text_surf,text_rect)
 
 #    def draw_background(self, game_map):
 #        # TODO: Change to a less complex rendering
