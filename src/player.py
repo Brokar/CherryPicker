@@ -5,7 +5,7 @@ from debug import debug
 from support import import_folder
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self,pos,groups, obstacle_sprites):
+    def __init__(self,pos,groups, obstacle_sprites, reference):
         super().__init__(groups)
         self.image = pygame.image.load(path.join("..", "tiles", "player1front.png")).convert_alpha()
         self.rect = self.image.get_rect(topleft = pos)
@@ -18,9 +18,13 @@ class Player(pygame.sprite.Sprite):
         self.obstacle_sprites = obstacle_sprites
         self.status = "down"
         self.import_player_assets()
-        self.contact_dict = {"trees":[],"obstacle":[]}
+        self.contact_dict = {"up":"","down":"", "left":"", "right":""}
         self.frame_index = 0
-        self.animation_speed = 0.001
+        self.animation_speed = 0.001     
+        self.basket_content = []
+        self.player_reference=reference
+        
+
 
     def set_pos(self, pos):
         self.position = pos
@@ -39,38 +43,39 @@ class Player(pygame.sprite.Sprite):
         # Debounce check
         if keys[pygame.K_UP] or keys[pygame.K_DOWN] or keys[pygame.K_RIGHT] or keys[pygame.K_LEFT] or keys [pygame.K_SPACE]:
             if not self.k_yet_press:
-                if keys[pygame.K_UP] and "up" not in self.contact_dict["trees"] and "up" not in self.contact_dict["obstacle"]:
+                if keys[pygame.K_UP] and not self.contact_dict["up"]:
                     self.direction[:] = 0,-1
                     self.status = "up"
-                elif keys[pygame.K_DOWN] and "down" not in self.contact_dict["trees"] and "down" not in self.contact_dict["obstacle"]:
+                elif keys[pygame.K_DOWN] and not self.contact_dict["down"]:
                     self.direction[:] = 0,1
                     self.status = "down"
-                elif keys[pygame.K_RIGHT] and "right" not in self.contact_dict["trees"] and "right" not in self.contact_dict["obstacle"]:
+                elif keys[pygame.K_RIGHT] and not self.contact_dict["right"]:
                     self.direction[:] = 1,0
                     self.status = "right"
-                elif keys[pygame.K_LEFT] and "left" not in self.contact_dict["trees"] and "left" not in self.contact_dict["obstacle"]:
+                elif keys[pygame.K_LEFT] and not self.contact_dict["left"]:
                     self.direction[:] = -1,0
                     self.status = "left"
-                elif keys [pygame.K_SPACE] and self.contact_dict["trees"]:
-                    self.pick(self.obstacle_sprites)
+                elif keys [pygame.K_SPACE] and "trees" in self.contact_dict.values():
+                    self.pick()
                 self.k_yet_press=True
                 
         else:
             self.k_yet_press=False
 
-    def move(self,speed):
+    def move(self):
+        self.rect.topleft += self.direction * self.speed * settings.game_map.tile_size 
+        settings.game_map.players_map[int(self.position[1]/settings.game_map.tile_size)][int(self.position[0]/settings.game_map.tile_size)]-=self.player_reference
+        self.position += self.direction * self.speed * settings.game_map.tile_size
+        settings.game_map.players_map[int(self.position[1]/settings.game_map.tile_size)][int(self.position[0]/settings.game_map.tile_size)]+=self.player_reference
 
-        self.rect.topleft += self.direction * speed * settings.game_map.tile_size 
-        settings.game_map.map[2][int(self.position[1]/settings.game_map.tile_size)][int(self.position[0]/settings.game_map.tile_size)]-=1
-        self.position += self.direction * speed * settings.game_map.tile_size
-        settings.game_map.map[2][int(self.position[1]/settings.game_map.tile_size)][int(self.position[0]/settings.game_map.tile_size)]+=1
 
-    def pick(self,obstacle_sprites):
+
+    def pick(self):
         inflated=self.rect.inflate(4,4)
-        for sprites in obstacle_sprites:
+        for sprites in self.obstacle_sprites:
             if inflated.colliderect(sprites.rect):
                 if sprites.fruit=="cherry":
-#                    self.basket_content.append(sprites.fruit)
+                    self.basket_content.append(sprites.fruit)
                     sprites.empty_tree()
 
     def collision(self,direction):
@@ -97,10 +102,10 @@ class Player(pygame.sprite.Sprite):
             "up": [], "down": [], "left": [], "right": [],
             "right_idle": [], "left_idle": [], "up_idle": [], "down_idle":[],
         }       
-
         for animation in self.animations.keys():
             full_path = path.join(character_path,animation)
             self.animations[animation] = import_folder(full_path)
+
     def get_status(self):
         # Idle Status
         if self.direction.x == 0 and self.direction.y == 0:
@@ -123,27 +128,28 @@ class Player(pygame.sprite.Sprite):
         #x and y order is inverted in the settings.game_map.game_map
         xposition_matrix=int(self.position[0]/settings.game_map.tile_size)
         yposition_matrix=int(self.position[1]/settings.game_map.tile_size)
-        self.contact_dict = {"trees":[],"obstacle":[]}
-        if yposition_matrix==len(settings.game_map.map[0])-1:
-            self.contact_dict["obstacle"].append("down")
-        elif settings.game_map.map[0][(yposition_matrix+1)][xposition_matrix]==1:
-            self.contact_dict["trees"].append("down")
+        self.contact_dict = {"up":"","down":"", "left":"", "right":""}
+        if yposition_matrix==settings.game_map.map_height-1:
+            self.contact_dict["down"]="obstacle"
+        elif settings.game_map.obstacles_map[(yposition_matrix+1)][xposition_matrix]!=0:
+            self.contact_dict["down"]="trees"
         if yposition_matrix==0:
-            self.contact_dict["obstacle"].append("up")
-        elif settings.game_map.map[0][(yposition_matrix-1)][xposition_matrix]==1:
-            self.contact_dict["trees"].append("up")
-        if xposition_matrix==len(settings.game_map.map[0][0])-1:
-            self.contact_dict["obstacle"].append("right")
-        elif settings.game_map.map[0][yposition_matrix][(xposition_matrix+1)]==1:
-            self.contact_dict["trees"].append("right")
+            self.contact_dict["up"]="obstacle"
+        elif settings.game_map.obstacles_map[(yposition_matrix-1)][xposition_matrix]!=0:
+            self.contact_dict["up"]="trees"
+        if xposition_matrix==settings.game_map.map_width-1:
+            self.contact_dict["right"]="obstacle"
+        elif settings.game_map.obstacles_map[yposition_matrix][(xposition_matrix+1)]!=0:
+            self.contact_dict["right"]="trees"
         if xposition_matrix==0:
-            self.contact_dict["obstacle"].append("left")
-        elif settings.game_map.map[0][yposition_matrix][(xposition_matrix-1)]==1:
-            self.contact_dict["trees"].append("left")
+            self.contact_dict["left"]="obstacle"
+        elif settings.game_map.obstacles_map[yposition_matrix][(xposition_matrix-1)]!=0:
+            self.contact_dict["left"]="trees"
+
 
     def update(self):
         self.contact()
         self.input()
         self.get_status()
         self.animate()
-        self.move(self.speed)
+        self.move()
