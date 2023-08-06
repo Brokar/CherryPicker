@@ -96,13 +96,14 @@ class YSortCameraGroup(pygame.sprite.Group):
 
         self.cherry_image = pygame.image.load(path.join("..","tiles","cherry.png")).convert_alpha()
         self.cherry_image = pygame.transform.scale(self.cherry_image,(80,80))
+    
+
     def custom_draw(self,player,background):
         CAMERA_SPEED = 10
         # Camara follows the player 
         if not self.free_camera:
             self.camara_off.x = player.rect.centerx - self.half_width
             self.camara_off.y = player.rect.centery - self.half_height
-
         else: 
             self.camara_off.x += self.input_camera.x * CAMERA_SPEED 
             self.camara_off.y += self.input_camera.y * CAMERA_SPEED
@@ -119,16 +120,13 @@ class YSortCameraGroup(pygame.sprite.Group):
     def user_interface(self,player):
         top=settings.game_map.map_height*settings.game_map.tile_size
 
-
         cherry_rect = self.cherry_image.get_rect(topleft=(10,top+10))
-
 
         cherry_number=player.basket_content.count("cherry")
         text_cherry="X "+str(cherry_number)
         self.font = pygame.font.Font(pygame.font.get_default_font(), 20)
         text_surf = self.font.render(text_cherry, False, "white")
         text_rect = text_surf.get_rect(topleft=cherry_rect.topright)
-
 
         box_width=cherry_rect.width+text_rect.width+20
         interface_rect=(0,top,box_width,cherry_rect.height+20)
@@ -159,7 +157,6 @@ class YSortCameraGroup(pygame.sprite.Group):
                 self.input_camera.y = -1
             elif keys[pygame.K_s]:
                 self.input_camera.y = 1 
-
             if keys[pygame.K_d]:
                 self.input_camera.x = 1 
             elif keys[pygame.K_a]:
