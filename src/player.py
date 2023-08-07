@@ -47,6 +47,8 @@ class Player(pygame.sprite.Sprite):
         # Debounce check
         if keys[pygame.K_UP] or keys[pygame.K_DOWN] or keys[pygame.K_RIGHT] or keys[pygame.K_LEFT] or keys [pygame.K_SPACE]:
             if not self.k_yet_press:
+                print(self.contact_dict)
+                
                 if keys[pygame.K_UP] and not self.contact_dict["up"]:
                     self.direction[:] = 0,-1
                     self.status = "up"

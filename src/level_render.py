@@ -4,7 +4,7 @@ from tile import Grass, CherryTree
 from player import Player#, interact_obj
 from debug import debug
 from os import path
-from bot import Bot
+
 
 class LevelRender:
     """ This class is incharge of rendering the game level 
