@@ -1,7 +1,8 @@
 import pygame
+from settings import TypePlayer
 import settings
 from tile import Grass, CherryTree
-from player import Player#, interact_obj
+from player import Player, Bot#, interact_obj
 from debug import debug
 from os import path
 
@@ -30,20 +31,21 @@ class LevelRender:
 
     def init_map(self, game_map):
         for row_index, row in enumerate(game_map.obstacles_map):
-            for col_index, col in enumerate(row):
+            for col_index, _ in enumerate(row): # _ is used for not accessed variables
                 x = col_index*game_map.tile_size
                 y = row_index*game_map.tile_size
                 Grass((x,y),self.background_tiles)
-                if game_map.obstacles_map[row_index][col_index]!=0:
-                    self.obstacle_references.append(CherryTree((x,y),[self.visible_sprites,self.obstacle_sprites]))
+                obstacle_id =  game_map.obstacles_map[row_index][col_index]
+                if obstacle_id!=0:
+                    self.obstacle_references.append(CherryTree((x,y),[self.visible_sprites,self.obstacle_sprites], obstacle_id))
 
                 if game_map.players_map[row_index][col_index]!=0:
                     #(position, [added to sprite group], passing obstacle_sprites, giving reference)
-                    if game_map.players_map[row_index][col_index]==1:
-                        self.player = Player((x,y),[self.visible_sprites],self.obstacle_references,game_map.players_map[row_index][col_index],self.state,"player") 
+                    if game_map.players_map[row_index][col_index]==TypePlayer.PLAYER:
+                        self.player = Player((x,y),[self.visible_sprites],self.obstacle_references) 
                         self.player_references.append(self.player)
-                    if game_map.players_map[row_index][col_index]==2:
-                        self.adversary = Player((x,y),[self.visible_sprites],self.obstacle_references,game_map.players_map[row_index][col_index],self.state,"bot") 
+                    if game_map.players_map[row_index][col_index]==TypePlayer.BOT_1:
+                        self.adversary = Bot((x,y),[self.visible_sprites],self.obstacle_references,TypePlayer.BOT_1) 
                         self.player_references.append(self.adversary)
 
 
@@ -70,20 +72,14 @@ class LevelRender:
         # 4. Other stuff in the map
         # Updating all visable sprites, including user
         #self.background_tiles.custom_draw()
-
-
-
-
-
-
-
-
-
         # self.update_game_state()
         self.background_tiles.update()
         self.background_tiles.custom_draw(self.player)
         self.state = self.visible_sprites.update()
         self.visible_sprites.custom_draw(self.player)
+        if self.player.stamina == 0:
+            self.adversary.restore_stamina()
+            self.player.restore_stamina()
         # if self.state == settings.GameStates.PLAYER:
         debug(str(f"{self.state}"))
         #     self.visible_sprites.update()
@@ -112,15 +108,6 @@ class YSortCameraGroup(pygame.sprite.Group):
         self.camara_off = pygame.math.Vector2()
         self.input_camera = pygame.math.Vector2()
         self.free_camera = False
-
-
-
-
-
-
-
-
-
         self.cherry_image = pygame.image.load(path.join("..","tiles","cherry.png")).convert_alpha()
         self.cherry_image = pygame.transform.scale(self.cherry_image,(80,80))
 
@@ -158,16 +145,6 @@ class YSortCameraGroup(pygame.sprite.Group):
         pygame.draw.rect(self.display_surface,"royalblue",interface_rect)
         self.display_surface.blit(self.cherry_image,cherry_rect)
         self.display_surface.blit(text_surf,text_rect)
-
-#    def draw_background(self, game_map):
-#        # TODO: Change to a less complex rendering
-#        for row_index,row in enumerate(game_map.get_matrix()):
-#            for col_index, col in enumerate(row):
-#                display_surface = pygame.display.get_surface()
-#                x = col_index * game_map.tile_size
-#                y = row_index * game_map.tile_size
-#                grass = Grass((x,y))
-#                display_surface.blit(grass.image, grass.rect.topleft - self.camara_off)
 
 
 

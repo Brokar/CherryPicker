@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import Type
 import numpy as np
 import random as random
 
@@ -6,6 +7,14 @@ class GameStates():
     PLAYER = "player"
     MOVING = 1
     AI = 2
+
+class TypePlayer():
+    PLAYER = 1
+    BOT_1 =   2
+
+DEFAULT_STAMINA=1
+FPS = 60
+
 
 
 class GameMap:
@@ -26,17 +35,20 @@ class GameMap:
         players_map = np.zeros((self.map_height,self.map_width))
         
         #player and bot are placed in the middle of theon top and bottom of map
-        players_map[0,int(self.map_width/2)] = 1
-        players_map[-1,int(self.map_width/2)] = 2
+        map_middle = int(self.map_width/2)
+        players_map[0,map_middle] = TypePlayer.PLAYER
+        players_map[-1,map_middle] = TypePlayer.BOT_1
         cherry_position=[]
-        i=0        
-        while i < self.number_of_cherries:
-            x=random.randint(0,self.map_width)
-            y=random.randint(0,(self.map_height-2))
+        for cherry_idx in range(self.number_of_cherries):
+            x=random.randint(0,self.map_width-1)
+            y=random.randint(0,self.map_height-2) # Trees occupy two vertical tiles
             pair=[y,x]
-            if pair!=[0,int(self.map_width/2)] and pair!=[-1,int(self.map_width/2)] and pair not in cherry_position:
+            if players_map[y,x] == 0 and pair not in cherry_position:
                 cherry_position.append(pair)
-                i+=1
+                obstacles_map[y,x] = cherry_idx+1
+            else: # in case of overlap, we retry in the next iteration
+                cherry_idx-=1;
+        print(obstacles_map)
         sample_number=0
         for row_index in range(0,self.map_height):
             for col_index in range(0,self.map_width):
@@ -44,13 +56,9 @@ class GameMap:
                     if row_index==pair[0] and col_index==pair[1]:
                         sample_number+=1
                         obstacles_map[row_index,col_index]=sample_number
+        print(obstacles_map)
         return [obstacles_map,players_map]
 
-
-
-
-
-FPS = 60
 
 
 
