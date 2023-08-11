@@ -6,7 +6,7 @@ from support import import_folder
 import random
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self,pos,groups, obstacle_sprites):
+    def __init__(self,pos,groups, obstacle_sprite_table):
         super().__init__(groups)
         self.image = pygame.image.load(path.join("..", "tiles","player", 
                                                  "down_idle","down_idle.png")).convert_alpha()
@@ -18,7 +18,7 @@ class Player(pygame.sprite.Sprite):
         self.direction = pygame.math.Vector2()
         self.speed = 1
         self.k_yet_press = False
-        self.obstacle_sprites = obstacle_sprites
+        self.obstacle_sprite_table = obstacle_sprite_table
         self.status = "down"
         self.stamina = settings.DEFAULT_STAMINA 
         self.contact_dict = {"up":"","down":"", "left":"", "right":""}
@@ -85,7 +85,8 @@ class Player(pygame.sprite.Sprite):
 
     def pick(self):
         inflated=self.rect.inflate(4,4)
-        for sprites in self.obstacle_sprites:
+        for key, sprites in self.obstacle_sprite_table.items():
+            print(sprites)
             if inflated.colliderect(sprites.rect):
                 if sprites.fruit=="cherry":
                     self.basket_content.append(sprites.fruit)
@@ -128,24 +129,23 @@ class Player(pygame.sprite.Sprite):
         if yposition_matrix==settings.game_map.map_height-1:
             self.contact_dict["down"]="obstacle"
         elif settings.game_map.obstacles_map[(yposition_matrix+1)][xposition_matrix]!=0:
-            self.contact_dict["down"]=self.access_obstacle((yposition_matrix+1),xposition_matrix,self.obstacle_sprites).fruit
+            self.contact_dict["down"]=self.get_obstacle((yposition_matrix+1),xposition_matrix).fruit
         if yposition_matrix==0:
             self.contact_dict["up"]="obstacle"
         elif settings.game_map.obstacles_map[(yposition_matrix-1)][xposition_matrix]!=0:
-            self.contact_dict["up"]=self.access_obstacle((yposition_matrix-1),xposition_matrix,self.obstacle_sprites).fruit
+            self.contact_dict["up"]=self.get_obstacle((yposition_matrix-1),xposition_matrix).fruit
         if xposition_matrix==settings.game_map.map_width-1:
             self.contact_dict["right"]="obstacle"
         elif settings.game_map.obstacles_map[yposition_matrix][(xposition_matrix+1)]!=0:
-            self.contact_dict["right"]=self.access_obstacle((yposition_matrix),xposition_matrix+1,self.obstacle_sprites).fruit
+            self.contact_dict["right"]=self.get_obstacle((yposition_matrix),xposition_matrix+1).fruit
         if xposition_matrix==0:
             self.contact_dict["left"]="obstacle"
         elif settings.game_map.obstacles_map[yposition_matrix][(xposition_matrix-1)]!=0:
-            self.contact_dict["left"]=self.access_obstacle((yposition_matrix),xposition_matrix-1,self.obstacle_sprites).fruit
+            self.contact_dict["left"]=self.get_obstacle((yposition_matrix),xposition_matrix-1).fruit
     
-    def access_obstacle(self,xposition,yposition,sprite_group):
-        reference=int(settings.game_map.obstacles_map[xposition][yposition])-1
-        obstacle=sprite_group[reference]
-        return obstacle
+    def get_obstacle(self,xposition,yposition):
+        reference=int(settings.game_map.obstacles_map[xposition][yposition])
+        return self.obstacle_sprite_table[reference]
 
 
     def update(self):
@@ -163,8 +163,8 @@ class Bot(Player):
     """ Bot is a type of player wich doesn't have its input controlled my 
         the keyboard
     """
-    def __init__(self,pos,groups, obstacle_sprites, reference_id):
-        super().__init__(pos,groups, obstacle_sprites)
+    def __init__(self,pos,groups, obstacle_sprite_table, reference_id):
+        super().__init__(pos,groups, obstacle_sprite_table)
         print(self.image)
         self.player_id = reference_id 
         # Bot uses override attributes as image or stamina

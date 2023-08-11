@@ -25,7 +25,7 @@ class LevelRender:
         self.obstacle_sprites = pygame.sprite.Group()
         self.player_references = []
         self.state = ["player"]     
-        self.obstacle_sprite_table = {}
+        self.obstacle_id_table = {}
         self.init_map(game_map)
         
 
@@ -37,14 +37,14 @@ class LevelRender:
                 Grass((x,y),self.background_tiles)
                 obstacle_id =  game_map.obstacles_map[row_index][col_index]
                 if obstacle_id!=0:
-                    self.obstacle_sprite_table[int(obstacle_id)] = CherryTree((x,y),[self.visible_sprites,self.obstacle_sprites], obstacle_id)
+                    self.obstacle_id_table[int(obstacle_id)] = CherryTree((x,y),[self.visible_sprites,self.obstacle_sprites], obstacle_id)
                 if game_map.players_map[row_index][col_index]!=0:
                     #(position, [added to sprite group], passing obstacle_sprites, giving reference)
                     if game_map.players_map[row_index][col_index]==TypePlayer.PLAYER:
-                        self.player = Player((x,y), [self.visible_sprites], self.obstacle_sprite_table) 
+                        self.player = Player((x,y), [self.visible_sprites], self.obstacle_id_table) 
                         self.player_references.append(self.player)
                     if game_map.players_map[row_index][col_index]==TypePlayer.BOT_1:
-                        self.adversary = Bot((x,y), [self.visible_sprites], self.obstacle_sprite_table, TypePlayer.BOT_1) 
+                        self.adversary = Bot((x,y), [self.visible_sprites], self.obstacle_id_table, TypePlayer.BOT_1) 
                         self.player_references.append(self.adversary)
 
 

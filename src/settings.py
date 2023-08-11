@@ -48,15 +48,6 @@ class GameMap:
                 obstacles_map[y,x] = cherry_idx+1
             else: # in case of overlap, we retry in the next iteration
                 cherry_idx-=1;
-        print(obstacles_map)
-        sample_number=0
-        for row_index in range(0,self.map_height):
-            for col_index in range(0,self.map_width):
-                for pair in cherry_position:
-                    if row_index==pair[0] and col_index==pair[1]:
-                        sample_number+=1
-                        obstacles_map[row_index,col_index]=sample_number
-        print(obstacles_map)
         return [obstacles_map,players_map]
 
 
