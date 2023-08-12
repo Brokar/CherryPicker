@@ -85,8 +85,7 @@ class Player(pygame.sprite.Sprite):
 
     def pick(self):
         inflated=self.rect.inflate(4,4)
-        for key, sprites in self.obstacle_sprite_table.items():
-            print(sprites)
+        for  _,sprites in self.obstacle_sprite_table.items():
             if inflated.colliderect(sprites.rect):
                 if sprites.fruit=="cherry":
                     self.basket_content.append(sprites.fruit)

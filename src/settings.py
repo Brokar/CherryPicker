@@ -10,8 +10,11 @@ class GameStates():
 
 class TypePlayer():
     PLAYER = 1
-    BOT_1 =   2
+    BOT_1 = 2
+    BOT_2 = 3
+    BOT_3 = 4
 
+NUM_ADVERSARIES=1
 DEFAULT_STAMINA=1
 FPS = 60
 
@@ -33,11 +36,8 @@ class GameMap:
         #layer0=terrain,layer1=player1,layer2=bot
         obstacles_map = np.zeros((self.map_height,self.map_width))
         players_map = np.zeros((self.map_height,self.map_width))
-        
+        self.place_players(players_map,NUM_ADVERSARIES) 
         #player and bot are placed in the middle of theon top and bottom of map
-        map_middle = int(self.map_width/2)
-        players_map[0,map_middle] = TypePlayer.PLAYER
-        players_map[-1,map_middle] = TypePlayer.BOT_1
         cherry_position=[]
         for cherry_idx in range(self.number_of_cherries):
             x=random.randint(0,self.map_width-1)
@@ -50,7 +50,16 @@ class GameMap:
                 cherry_idx-=1;
         return [obstacles_map,players_map]
 
-
+    def place_players(self, players_map, num_adv):
+        middle_width = int(self.map_width/2)
+        middle_height = int(self.map_height/2)
+        players_map[0,middle_width] = TypePlayer.PLAYER
+        players_map[-1,middle_width] = TypePlayer.BOT_1
+        if(num_adv == 2):
+            players_map[middle_height, 0] = TypePlayer.BOT_2
+        if(num_adv == 3):
+            players_map[middle_height, -1] = TypePlayer.BOT_3
+        
 
 
 def init(width, height):

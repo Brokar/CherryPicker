@@ -24,10 +24,10 @@ class LevelRender:
         self.visible_sprites = YSortCameraGroup()
         self.obstacle_sprites = pygame.sprite.Group()
         self.player_references = []
+        self.adversaries = []
         self.state = ["player"]     
         self.obstacle_sprite_table = {}
         self.init_map(game_map)
-        
 
     def init_map(self, game_map):
         for row_index, row in enumerate(game_map.obstacles_map):
@@ -39,13 +39,15 @@ class LevelRender:
                 if obstacle_id!=0:
                     self.obstacle_sprite_table[int(obstacle_id)] = CherryTree((x,y),[self.visible_sprites,self.obstacle_sprites], obstacle_id)
                 if game_map.players_map[row_index][col_index]!=0:
-                    #(position, [added to sprite group], passing obstacle_sprites, giving reference)
+                    #(position, [added to sprite group], passing obstacle_sprites, obstacle id reference)
                     if game_map.players_map[row_index][col_index]==TypePlayer.PLAYER:
                         self.player = Player((x,y), [self.visible_sprites], self.obstacle_sprite_table) 
-                        self.player_references.append(self.player)
                     if game_map.players_map[row_index][col_index]==TypePlayer.BOT_1:
-                        self.adversary = Bot((x,y), [self.visible_sprites], self.obstacle_sprite_table, TypePlayer.BOT_1) 
-                        self.player_references.append(self.adversary)
+                        self.adversaries.append(Bot((x,y), [self.visible_sprites], self.obstacle_sprite_table, TypePlayer.BOT_1))
+                    if game_map.players_map[row_index][col_index]==TypePlayer.BOT_2:
+                        self.adversaries.append(Bot((x,y), [self.visible_sprites], self.obstacle_sprite_table, TypePlayer.BOT_2))
+                    if game_map.players_map[row_index][col_index]==TypePlayer.BOT_3:
+                        self.adversaries.append(Bot((x,y), [self.visible_sprites], self.obstacle_sprite_table, TypePlayer.BOT_3))
 
 
     # def update_game_state(self):
@@ -73,11 +75,12 @@ class LevelRender:
         #self.background_tiles.custom_draw()
         # self.update_game_state()
         self.background_tiles.update()
-        self.background_tiles.custom_draw(self.player)
         self.state = self.visible_sprites.update()
+        self.background_tiles.custom_draw(self.player)
         self.visible_sprites.custom_draw(self.player)
+
         if self.player.stamina == 0:
-            self.adversary.restore_stamina()
+            self.adversaries[0].restore_stamina()
             self.player.restore_stamina()
         # if self.state == settings.GameStates.PLAYER:
         debug(str(f"{self.state}"))
