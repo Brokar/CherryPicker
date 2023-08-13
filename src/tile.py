@@ -3,11 +3,12 @@ import pygame
 import settings
 
 class CherryTree(pygame.sprite.Sprite):
-    def __init__(self,pos,groups):
+    def __init__(self,pos,groups, tree_id):
         super().__init__(groups)
         self.image = pygame.image.load(path.join("..", "tiles","fullbush.png")).convert_alpha()
         self.rect = self.image.get_rect(topleft = pos)
         # Get the display surface
+        self.tree_id = tree_id
         self.fruit = "cherry"  
     def empty_tree(self):
         self.fruit = "empty"
