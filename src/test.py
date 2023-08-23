@@ -1,5 +1,3 @@
-x=2
-if x==2:
-    print ("lol")
-    x=3
-    print("test")
+x=[["a"],["b"],["c"]]
+if ["cherry" in liste for liste in x]:
+    print("in")

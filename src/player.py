@@ -49,7 +49,7 @@ class Player(pygame.sprite.Sprite):
         if (keys[pygame.K_UP] or keys[pygame.K_DOWN] or keys[pygame.K_RIGHT] 
                             or keys[pygame.K_LEFT] or keys [pygame.K_SPACE]):
             if not self.k_yet_press:
-                print(self.contact_dict)
+                print([element if type(element)==str else element.fruit for element in self.contact_dict.values()])
                 
                 if keys[pygame.K_UP] and not self.contact_dict["up"]:
                     self.direction[:] = 0,-1
@@ -63,7 +63,7 @@ class Player(pygame.sprite.Sprite):
                 elif keys[pygame.K_LEFT] and not self.contact_dict["left"]:
                     self.direction[:] = -1,0
                     self.status = "left"
-                elif keys [pygame.K_SPACE] and "cherry" in self.contact_dict.values():
+                elif keys [pygame.K_SPACE] and "cherry" in [element if type(element)==str else element.fruit for element in self.contact_dict.values()]:
                     self.pick()
                 self.k_yet_press=True
                 
@@ -84,12 +84,17 @@ class Player(pygame.sprite.Sprite):
 
 
     def pick(self):
+        id_list = [element.tree_id for element in self.contact_dict.values() if type(element)!=str]
         inflated=self.rect.inflate(4,4)
-        for  _,sprites in self.obstacle_sprite_table.items():
-            if inflated.colliderect(sprites.rect):
-                if sprites.fruit=="cherry":
-                    self.basket_content.append(sprites.fruit)
-                    sprites.empty_tree()
+        for identifier in id_list:
+            self.basket_content.append(self.obstacle_sprite_table[identifier])
+            self.obstacle_sprite_table[identifier].empty_tree()
+
+        # for  _,sprites in self.obstacle_sprite_table.items():
+        #     if inflated.colliderect(sprites.rect):
+        #         if sprites.fruit=="cherry":
+        #             self.basket_content.append(sprites.fruit)
+        #             sprites.empty_tree()
 
     
     def import_player_assets(self):
@@ -128,19 +133,19 @@ class Player(pygame.sprite.Sprite):
         if yposition_matrix==settings.game_map.map_height-1:
             self.contact_dict["down"]="obstacle"
         elif settings.game_map.obstacles_map[(yposition_matrix+1)][xposition_matrix]!=0:
-            self.contact_dict["down"]=self.get_obstacle((yposition_matrix+1),xposition_matrix).fruit
+            self.contact_dict["down"]=self.get_obstacle((yposition_matrix+1),xposition_matrix)
         if yposition_matrix==0:
             self.contact_dict["up"]="obstacle"
         elif settings.game_map.obstacles_map[(yposition_matrix-1)][xposition_matrix]!=0:
-            self.contact_dict["up"]=self.get_obstacle((yposition_matrix-1),xposition_matrix).fruit
+            self.contact_dict["up"]=self.get_obstacle((yposition_matrix-1),xposition_matrix)
         if xposition_matrix==settings.game_map.map_width-1:
             self.contact_dict["right"]="obstacle"
         elif settings.game_map.obstacles_map[yposition_matrix][(xposition_matrix+1)]!=0:
-            self.contact_dict["right"]=self.get_obstacle((yposition_matrix),xposition_matrix+1).fruit
+            self.contact_dict["right"]=self.get_obstacle((yposition_matrix),xposition_matrix+1)
         if xposition_matrix==0:
             self.contact_dict["left"]="obstacle"
         elif settings.game_map.obstacles_map[yposition_matrix][(xposition_matrix-1)]!=0:
-            self.contact_dict["left"]=self.get_obstacle((yposition_matrix),xposition_matrix-1).fruit
+            self.contact_dict["left"]=self.get_obstacle((yposition_matrix),xposition_matrix-1)
     
     def get_obstacle(self,xposition,yposition):
         reference=int(settings.game_map.obstacles_map[xposition][yposition])
@@ -172,6 +177,7 @@ class Bot(Player):
         self.rect = self.image.get_rect(topleft = pos)
         self.import_player_assets()
         self.stamina = 0
+
     def input(self):
         """ input method is overriden 
         """
@@ -180,7 +186,7 @@ class Bot(Player):
         self.direction.y = 0
         # Enter options
         possibilities=[]
-        if "cherry" in self.contact_dict.values():
+        if "cherry" in [element if type(element)==str else element.fruit for element in self.contact_dict.values()]:
             self.pick()
         else:
             if not self.contact_dict["up"]:
