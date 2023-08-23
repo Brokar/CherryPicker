@@ -1,7 +1,7 @@
 import pygame
 from settings import TypePlayer
 import settings
-from tile import Grass, CherryTree
+from tile import Grass, CherryTree, Rock
 from player import Player, Bot#, interact_obj
 from debug import debug
 from os import path
@@ -37,7 +37,10 @@ class LevelRender:
                 Grass((x,y),self.background_tiles)
                 obstacle_id =  game_map.obstacles_map[row_index][col_index]
                 if obstacle_id!=0:
-                    self.obstacle_sprite_table[int(obstacle_id)] = CherryTree((x,y),[self.visible_sprites,self.obstacle_sprites], obstacle_id)
+                    if obstacle_id<100:
+                        self.obstacle_sprite_table[int(obstacle_id)] = CherryTree((x,y),[self.visible_sprites,self.obstacle_sprites], obstacle_id)
+                    else:
+                        self.obstacle_sprite_table[int(obstacle_id)] = Rock((x,y),[self.visible_sprites,self.obstacle_sprites], obstacle_id)
                 if game_map.players_map[row_index][col_index]!=0:
                     #(position, [added to sprite group], passing obstacle_sprites, obstacle id reference)
                     if game_map.players_map[row_index][col_index]==TypePlayer.PLAYER:
@@ -48,6 +51,7 @@ class LevelRender:
                         self.adversaries.append(Bot((x,y), [self.visible_sprites], self.obstacle_sprite_table, TypePlayer.BOT_2))
                     if game_map.players_map[row_index][col_index]==TypePlayer.BOT_3:
                         self.adversaries.append(Bot((x,y), [self.visible_sprites], self.obstacle_sprite_table, TypePlayer.BOT_3))
+        print(self.obstacle_sprite_table)
 
 
     # def update_game_state(self):
