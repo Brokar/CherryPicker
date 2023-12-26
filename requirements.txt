@@ -1,4 +1,5 @@
 neurolab==0.3.5
+tensorflow==2.15.0
 numpy==1.25.1
 pygame==2.5.0
 python-utils==3.7.0
