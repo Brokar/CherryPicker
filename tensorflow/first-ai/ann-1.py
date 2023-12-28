@@ -1,15 +1,13 @@
 import os
+from keras.src.optimizers import SGD
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1'
 os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
 import tensorflow as tf
 import keras
 import keras.losses as loss
 import numpy as np
-from numpy.core.fromnumeric import reshape
 import numpy.random as rand
-import math
-import pylab as pl
-from simtools import rand_matrix, get_sign, find_min_dist_one
+from simtools import bfs_tree_step, rand_matrix, get_sign, bfs_closest_tree, bfs_next_dir
 ####### CONSTANTS #######
 MATRIX_SIZE=9 # 5
 INPUT_NUM = MATRIX_SIZE*MATRIX_SIZE
@@ -55,9 +53,8 @@ def gen_train_data(samples):
     solutions = np.zeros((samples,OUTPUT_NUM), dtype=int)
     for i in range(samples):
         m1 = rand_matrix(MATRIX_SIZE,TREES)
-        t_pos=find_min_dist_one(m1)
-        p_pos = int(len(m1)/2)
-        sol=best_solution(t_pos[1],t_pos[0],p_pos,p_pos)
+        sol = bfs_next_dir(m1)
+        #sol=best_solution(t_pos[1],t_pos[0],p_pos,p_pos)
         #print(np.reshape(m1,(-1,1)))
         data[i,:]=m1.reshape(1,-1)[0]
         solutions[i,:] = sol
@@ -68,9 +65,7 @@ def gen_test_data(samples):
     solutions = np.zeros((samples,OUTPUT_NUM), dtype=int)
     for i in range(samples):
         m1 = rand_matrix(MATRIX_SIZE,TREES)
-        t_pos=find_min_dist_one(m1)
-        p_pos = int(len(m1)/2)
-        sol=best_solution(t_pos[1],t_pos[0],p_pos,p_pos, True)
+        sol= bfs_next_dir(m1)
         #print(np.reshape(m1,(-1,1)))
         data[i,:]=m1.reshape(1,-1)[0]
         solutions[i,:] = sol
@@ -78,15 +73,17 @@ def gen_test_data(samples):
 
 # Function to test best_solution function
 def test_best_solution_function():
-    m_size=7
+    m_size=9
     samples=3
     m1 = rand_matrix(m_size,samples, True)
     print(m1)
-    t_pos=find_min_dist_one(m1)
+    print("bfs_tree_step: ",bfs_tree_step(m1))
+    t_pos=bfs_closest_tree(m1)
     print("sel_tree_x: "+str(t_pos[1]))
     print("sel_tree_y: "+str(t_pos[0]))
-    p_pos = int(len(m1)/2)
-    s=best_solution(t_pos[1],t_pos[0],p_pos,p_pos)
+    s=bfs_next_dir(m1)#best_solution(t_pos[1],t_pos[0],p_pos,p_pos)
+    ny,nx= bfs_tree_step(m1)[-2]
+    print("Next tile {}, {}".format(ny,nx))
     print("sol_x: "+str(s[1]))
     print("sol_y: "+str(s[0]))
     print("pick : "+str(s[2]))
@@ -117,11 +114,12 @@ input_layer = create_input_layer(INPUT_NUM,INPUT_RANGE)
 model = keras.Sequential(
     [
        keras.layers.Dense(units=INPUT_NUM, activation="relu", name="layer1"),
-       keras.layers.Dense(int(INPUT_NUM/3), activation="tanh", name="layer2"),
+       keras.layers.Dense(int(INPUT_NUM/2), activation="linear", name="layer2"),
        keras.layers.Dense(units=OUTPUT_NUM, activation="tanh", name="layer3"),
     ]
 )
-model.compile(optimizer='adam',
+opt = SGD(lr=0.01, momentum=0.9)
+model.compile(optimizer=opt,
               loss=loss.MeanSquaredError(),
               metrics=['accuracy'])
 
@@ -130,7 +128,7 @@ model.compile(optimizer='adam',
 #test_best_solution_function()
 
 data, sol=gen_train_data(TRAINING_SAMPLES)
-model.fit(data,sol, epochs=1000)
+model.fit(data,sol, epochs=2000)
 # Simulate network(predicting)
 model.summary()
 correct=0
@@ -144,9 +142,9 @@ for prediction, data, sol in  zip(predicted_value, test_data, sol):
         correct+=1
     elif (norm_prediction==sol).all():
         correct+=1
-   # else:
-   #     print("Predicted[{}]: {}".format(indx,norm_prediction))
-   #     print("Data[{}]: {}".format(indx,data) )
+    else:
+        print("Predicted[{}]: {}".format(indx,prediction))
+        print("Sol[{}]: {}".format(indx,sol) )
     indx +=1     
 print("Accuracy: ", correct/TEST_SAMPLES)
 print("Correct: ", correct)

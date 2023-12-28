@@ -1,9 +1,7 @@
+from os import path
 import numpy as np
-import neurolab as nl
-from numpy.core.fromnumeric import reshape
 import numpy.random as rand
 import math
-import pylab as pl
 
 
 
@@ -38,6 +36,93 @@ def get_sign(number):
       return 1
     elif (number<0):
       return -1
+
+def adjacents_idnx(matrix, pos):
+    """
+    Returns a valid adjecent list of positions 
+    from the matrix, excluding borders and pos 
+    """
+    adj_l = []
+    # Ranges shall be used if we would allow 
+    # diagonal moves
+    for i in [pos[0]-1, pos[0]+1]:
+        if(i>0 and i < len(matrix)): 
+                adj_l.append((i,pos[1]))
+    for j in [pos[1]-1, pos[1]+1]:
+        if(j >0 and j <len(matrix)):
+            adj_l.append((pos[0],j))
+    return adj_l
+
+def reverse_bfs(pred, target):
+    """
+    Reverse the pred matrix from the target 
+    and return the shortest path
+    """
+    # Adding ending node
+    path =[target]
+    while (pred[target[0],target[1]] != 0):
+        path.append(pred[target[0],target[1]])
+        target = pred[target[0],target[1]]
+    return path
+
+def bfs_tree_step(matrix):
+    """
+    Returns a list of steps to the closest
+    tree
+    """
+    m_size = len(matrix)
+    mid = int(m_size / 2)
+    visited = np.zeros((m_size,m_size), dtype=bool)
+    pred = np.zeros((m_size,m_size), dtype=object)
+    queue = []
+    # Mark mid as visited and put queued
+    queue.append((mid,mid))
+    visited[mid,mid] = True
+    while queue:
+        s = queue.pop(0)
+        for cell in adjacents_idnx(matrix, s):
+            if visited[cell[0],cell[1]] == False:
+                queue.append(cell)
+                visited[cell[0],cell[1]] = True
+                pred[cell[0],cell[1]] = s
+                if(matrix[cell[0],cell[1]] == 1):
+                    # tree found
+                    return reverse_bfs(pred, cell)
+    # Nothing found
+    return [(mid,mid)]
+
+def bfs_next_dir(matrix):
+    path_t = bfs_tree_step(matrix)
+    if(len(path_t)<3):
+        dir=[0, 0, 1]
+    else:
+        dir = [path_t[-2][0]-path_t[-1][0], 
+               path_t[-2][1]-path_t[-1][1],
+               0]
+    return dir
+
+def bfs_closest_tree(matrix):
+    """
+    Returns the position of a 1 in the matrix that is 
+    closest to the center of the matrix
+    """
+    m_size = len(matrix)
+    mid = int(m_size / 2)
+    visited = np.zeros((m_size,m_size), dtype=bool)
+    queue = []
+    # Mark mid as visited and put queued
+    queue.append((mid,mid))
+    visited[mid,mid] = True
+    while queue:
+        s = queue.pop(0)
+        for cell in adjacents_idnx(matrix, s):
+            if visited[cell[0],cell[1]] == False:
+                queue.append(cell)
+                visited[cell[0],cell[1]] = True
+                if(matrix[cell[0],cell[1]] == 1):
+                    # tree found
+                    return [cell[1], cell[0]]
+    return [mid,mid]
 
 def find_min_dist_one(matrix):
     """
