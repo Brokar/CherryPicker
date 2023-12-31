@@ -1,5 +1,5 @@
 import pygame
-from settings import TypePlayer
+from settings import TypePlayer, HANDLER_MASK, ROCK_HANDLER, TREE_HANDLER
 import settings
 from tile import Grass, CherryTree, Rock
 from player import Player, Bot#, interact_obj
@@ -37,9 +37,9 @@ class LevelRender:
                 Grass((x,y),self.background_tiles)
                 obstacle_id =  game_map.obstacles_map[row_index][col_index]
                 if obstacle_id!=0:
-                    if obstacle_id<100:
+                    if (obstacle_id & HANDLER_MASK) == TREE_HANDLER :
                         self.obstacle_sprite_table[int(obstacle_id)] = CherryTree((x,y),[self.visible_sprites,self.obstacle_sprites], obstacle_id)
-                    else:
+                    elif (obstacle_id & HANDLER_MASK) == ROCK_HANDLER:
                         self.obstacle_sprite_table[int(obstacle_id)] = Rock((x,y),[self.visible_sprites,self.obstacle_sprites], obstacle_id)
                 if game_map.players_map[row_index][col_index]!=0:
                     #(position, [added to sprite group], passing obstacle_sprites, obstacle id reference)
