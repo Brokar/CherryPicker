@@ -93,12 +93,18 @@ def bfs_tree_step(matrix):
 
 def bfs_next_dir(matrix):
     path_t = bfs_tree_step(matrix)
+    dir = 0
     if(len(path_t)<3):
-        dir=[0, 0, 1]
+        dir = 4
     else:
-        dir = [path_t[-2][0]-path_t[-1][0], 
-               path_t[-2][1]-path_t[-1][1],
-               0]
+        if(path_t[-2][0]-path_t[-1][0]>0):
+            dir=0
+        elif(path_t[-2][0]-path_t[-1][0]<0):
+            dir=1
+        elif(path_t[-2][1]-path_t[-1][1]>0):
+            dir=2
+        elif(path_t[-2][1]-path_t[-1][1]<0):
+            dir=3
     return dir
 
 def bfs_closest_tree(matrix):
