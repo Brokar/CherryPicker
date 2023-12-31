@@ -14,6 +14,14 @@ class CherryTree(pygame.sprite.Sprite):
         self.fruit = "empty"
         self.image = pygame.image.load(path.join("..","tiles","emptybush.png")).convert_alpha()
 
+class Rock(pygame.sprite.Sprite):
+    def __init__(self,pos,groups, tree_id):
+        super().__init__(groups)
+        self.image = pygame.image.load(path.join("..", "tiles","rock.png")).convert_alpha()
+        self.rect = self.image.get_rect(topleft = pos)
+        # Get the display surface
+        self.tree_id = tree_id
+        self.fruit = "obstacle"      
 
 
 class Grass(pygame.sprite.Sprite):
