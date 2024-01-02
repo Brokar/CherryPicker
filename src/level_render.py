@@ -1,11 +1,10 @@
 import pygame
-from settings import TypePlayer, HANDLER_MASK, ROCK_HANDLER, TREE_HANDLER
+from settings import GameStates, TypePlayer, HANDLER_MASK, ROCK_HANDLER, TREE_HANDLER
 import settings
 from tile import Grass, CherryTree, Rock
 from player import Player, Bot#, interact_obj
 from debug import debug
-from os import path
-
+from ui import UI
 
 class LevelRender:
     """ This class is incharge of rendering the game level 
@@ -25,10 +24,11 @@ class LevelRender:
         self.obstacle_sprites = pygame.sprite.Group()
         self.player_references = []
         self.adversaries = []
-        self.state = ["player"]     
+        self.state = GameStates.PLAYER     
         self.obstacle_sprite_table = {}
         self.init_map(game_map)
-
+        # user interface 
+        self.ui = UI()
     def init_map(self, game_map):
         for row_index, row in enumerate(game_map.obstacles_map):
             for col_index, _ in enumerate(row): # _ is used for not accessed variables
@@ -54,20 +54,23 @@ class LevelRender:
         print(self.obstacle_sprite_table)
 
 
-    # def update_game_state(self):
-    #     keys = pygame.key.get_pressed()
-    #     # Debounce check
-    #     if keys[pygame.K_SPACE] or keys[pygame.K_RETURN]: 
-    #         if not self.k_space_is_press:
-    #             if keys[pygame.K_RETURN]:
-    #                 self.state = settings.GameStates.MOVING
-    #                 self.start_state_ticks=pygame.time.get_ticks()
-    #                 self.player.reset_pos()
-    #             if keys[pygame.K_SPACE]:
-    #                 self.player.reset_pos()
-    #             self.k_space_is_press=True
-    #     else:
-    #         self.k_space_is_press=False
+    def input(self):
+        keys = pygame.key.get_pressed()
+        # Debounce check
+        if keys[pygame.K_ESCAPE] or keys[pygame.K_RETURN]: 
+            if not self.k_space_is_press:
+                if keys[pygame.K_ESCAPE]:
+                    if self.state == settings.GameStates.PLAYER:
+                        self.state = settings.GameStates.PAUSED
+                        print("State: PAUSED")
+                    else:
+                        self.state = settings.GameStates.PLAYER
+                if keys[pygame.K_RETURN]:
+                    self.state = settings.GameStates.PLAYER
+                    print("State: PLAYER")
+                self.k_space_is_press=True
+        else:
+            self.k_space_is_press=False
 
     def update_map(self):
         # TODO: define game stages. 
@@ -75,19 +78,20 @@ class LevelRender:
         # 2. Player moving turn
         # 3. AI turn
         # 4. Other stuff in the map
-        # Updating all visable sprites, including user
-        #self.background_tiles.custom_draw()
-        # self.update_game_state()
+        # Updating all visable sprites, including user and background
         self.background_tiles.update()
-        self.state = self.visible_sprites.update()
+        self.visible_sprites.update()
+        self.input()
         self.background_tiles.custom_draw(self.player)
         self.visible_sprites.custom_draw(self.player)
-
+        # Update main manu and counter
+        self.ui.display(self.player, self.state)
+        # Refresh stamina
         if self.player.stamina == 0:
             self.adversaries[0].restore_stamina()
             self.player.restore_stamina()
         # if self.state == settings.GameStates.PLAYER:
-        debug(str(f"{self.state}"))
+        # debug(str(f"{self.state}"))
         #     self.visible_sprites.update()
         #     self.visible_sprites.custom_draw(self.player)
 
@@ -114,8 +118,6 @@ class YSortCameraGroup(pygame.sprite.Group):
         self.camara_off = pygame.math.Vector2()
         self.input_camera = pygame.math.Vector2()
         self.free_camera = False
-        self.cherry_image = pygame.image.load(path.join("..","tiles","cherry.png")).convert_alpha()
-        self.cherry_image = pygame.transform.scale(self.cherry_image,(80,80))
 
     def custom_draw(self,player):
 
@@ -133,28 +135,14 @@ class YSortCameraGroup(pygame.sprite.Group):
         for sprite in sorted(self.sprites(),key = lambda sprite: sprite.rect.centery):
             offset_pos = sprite.rect.topleft - self.camara_off
             self.display_surface.blit(sprite.image, offset_pos)
-        self.score_counter(player)
-
-    def score_counter(self,player):
-        top=settings.game_map.map_height*settings.game_map.tile_size
-
-        cherry_rect = self.cherry_image.get_rect(topleft=(10,top+10))
-
-        cherry_number=player.get_cherries()
-        text_cherry="X "+str(cherry_number)
-        self.font = pygame.font.Font(pygame.font.get_default_font(), 20)
-        text_surf = self.font.render(text_cherry, False, "white")
-        text_rect = text_surf.get_rect(topleft=cherry_rect.topright)
-
-        box_width=cherry_rect.width+text_rect.width+20
-        interface_rect=(0,top,box_width,cherry_rect.height+20)
-        pygame.draw.rect(self.display_surface,"royalblue",interface_rect)
-        self.display_surface.blit(self.cherry_image,cherry_rect)
-        self.display_surface.blit(text_surf,text_rect)
 
 
 
-    def input(self):
+
+    def menu_input(self):
+        """
+        Menu inputs
+        """
         keys = pygame.key.get_pressed()
         self.input_camera.x = 0
         self.input_camera.y = 0
@@ -174,7 +162,7 @@ class YSortCameraGroup(pygame.sprite.Group):
 
     def update(self):
         super().update()
-        self.input()
+        self.menu_input()
 
 
 
