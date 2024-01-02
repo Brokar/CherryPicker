@@ -133,14 +133,14 @@ class YSortCameraGroup(pygame.sprite.Group):
         for sprite in sorted(self.sprites(),key = lambda sprite: sprite.rect.centery):
             offset_pos = sprite.rect.topleft - self.camara_off
             self.display_surface.blit(sprite.image, offset_pos)
-        self.user_interface(player)
+        self.score_counter(player)
 
-    def user_interface(self,player):
+    def score_counter(self,player):
         top=settings.game_map.map_height*settings.game_map.tile_size
 
         cherry_rect = self.cherry_image.get_rect(topleft=(10,top+10))
 
-        cherry_number=player.basket_content.count("cherry")
+        cherry_number=player.get_cherries()
         text_cherry="X "+str(cherry_number)
         self.font = pygame.font.Font(pygame.font.get_default_font(), 20)
         text_surf = self.font.render(text_cherry, False, "white")

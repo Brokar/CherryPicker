@@ -32,20 +32,22 @@ class GameMap:
         self.number_of_rock=9
         self.tile_size = 32 
         self.occupied_tiles = []
+        self.player_tiles = []
         self.random_map()
 
     def __generate_rocks(self, num):
         rock_concat = 3
-        self.occupied_tiles=[]
         for rock_block_idx in range(0,num,rock_concat):
             x=random.randint(0,self.map_width-1)
             y=random.randint(0,self.map_height-2) # Trees occupy two vertical tiles
             pair=[y,x]
             pairbefore=[y,x-1]
             pairafter=[y,x+1]
-            if (self.players_map[y,x] == 0 and 
+            if ((pair not in self.player_tiles) and 
                 (pair not in self.occupied_tiles) and 
+                (pairbefore not in self.player_tiles) and
                 (pairbefore not in self.occupied_tiles) and 
+                (pairafter not in self.player_tiles) and
                 (pairafter not in self.occupied_tiles) 
                 and ((x+1) < (self.map_width))):
                 self.occupied_tiles.append(pair)
@@ -84,12 +86,16 @@ class GameMap:
         middle_width = int(self.map_width/2)
         middle_height = int(self.map_height/2)
         players_map[0,middle_width] = TypePlayer.PLAYER
+        self.player_tiles.append([0,middle_width]) 
         players_map[-1,middle_width] = TypePlayer.BOT_1
+        self.player_tiles.append([-1,middle_width]) 
         if(num_adv == 2):
             players_map[middle_height, 0] = TypePlayer.BOT_2
+            self.player_tiles.append([middle_height, 0]) 
         if(num_adv == 3):
             players_map[middle_height, -1] = TypePlayer.BOT_3
-        
+            self.player_tiles.append([middle_height, -1]) 
+         
 
 
 def init(width, height):

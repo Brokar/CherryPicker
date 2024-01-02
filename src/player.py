@@ -4,6 +4,7 @@ import settings
 from debug import debug
 from support import import_folder
 import random
+from tile import CherryTree
 
 class Player(pygame.sprite.Sprite):
     def __init__(self,pos,groups, obstacle_sprite_table):
@@ -25,6 +26,7 @@ class Player(pygame.sprite.Sprite):
         self.frame_index = 0
         self.animation_speed = 0.001     
         self.basket_content = []
+        self.picked_cherries = 0
         self.player_id=settings.TypePlayer.PLAYER
         self.import_player_assets()
         
@@ -61,8 +63,10 @@ class Player(pygame.sprite.Sprite):
                 elif keys[pygame.K_LEFT] and not self.contact_dict["left"]:
                     self.direction[:] = -1,0
                     self.status = "left"
-                elif keys [pygame.K_SPACE] and "cherry" in [element if type(element)==str else element.fruit for element in self.contact_dict.values()]:
-                    self.pick()
+                elif keys [pygame.K_SPACE]:
+                    for obstacle in self.contact_dict.values():
+                        if (type(obstacle) is CherryTree) and (obstacle.fruit == "cherry"):
+                            self.pick_cherry(obstacle)
                 self.k_yet_press=True
                 
                 
@@ -81,14 +85,13 @@ class Player(pygame.sprite.Sprite):
         
 
 
-    def pick(self):
-        id_list = [element.tree_id if element.fruit!="obstacle" else 0 for element in self.contact_dict.values() if type(element)!=str]
-        for identifier in id_list:
-            self.basket_content.append(self.obstacle_sprite_table[identifier])
-            self.obstacle_sprite_table[identifier].empty_tree()
+    def pick_cherry(self, cherry_obj):
+            self.basket_content.append(self.obstacle_sprite_table[cherry_obj.tree_id])
+            self.obstacle_sprite_table[cherry_obj.tree_id].empty_tree()
+            self.picked_cherries += 1
 
-
-    
+    def get_cherries(self):
+        return self.picked_cherries
     def import_player_assets(self):
         #import assets for animation
         self.animations = {
@@ -118,6 +121,9 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(topleft = (self.position[0], self.position[1]))
 
     def contact(self):
+        """
+        Updates possible interactions
+        """
         #x and y order is inverted in the settings.game_map.game_map
         xposition_matrix=int(self.position[0]/settings.game_map.tile_size)
         yposition_matrix=int(self.position[1]/settings.game_map.tile_size)
@@ -125,31 +131,19 @@ class Player(pygame.sprite.Sprite):
         if yposition_matrix==settings.game_map.map_height-1:
             self.contact_dict["down"]="obstacle"
         elif settings.game_map.obstacles_map[(yposition_matrix+1)][xposition_matrix]!=0:
-            if self.get_obstacle((yposition_matrix+1),xposition_matrix).fruit=="obstacle":
-                self.contact_dict["down"]="obstacle"
-            else:
-                self.contact_dict["down"]=self.get_obstacle((yposition_matrix+1),xposition_matrix)
+            self.contact_dict["down"]=self.get_obstacle((yposition_matrix+1),xposition_matrix)
         if yposition_matrix==0:
             self.contact_dict["up"]="obstacle"
         elif settings.game_map.obstacles_map[(yposition_matrix-1)][xposition_matrix]!=0:
-            if self.get_obstacle((yposition_matrix-1),xposition_matrix).fruit=="obstacle":
-                self.contact_dict["up"]="obstacle"
-            else:            
-                self.contact_dict["up"]=self.get_obstacle((yposition_matrix-1),xposition_matrix)
+            self.contact_dict["up"]=self.get_obstacle((yposition_matrix-1),xposition_matrix)
         if xposition_matrix==settings.game_map.map_width-1:
             self.contact_dict["right"]="obstacle"
         elif settings.game_map.obstacles_map[yposition_matrix][(xposition_matrix+1)]!=0:
-            if self.get_obstacle((yposition_matrix),xposition_matrix+1).fruit=="obstacle":
-                self.contact_dict["right"]="obstacle"
-            else:            
-                self.contact_dict["right"]=self.get_obstacle((yposition_matrix),xposition_matrix+1)
+            self.contact_dict["right"]=self.get_obstacle((yposition_matrix),xposition_matrix+1)
         if xposition_matrix==0:
             self.contact_dict["left"]="obstacle"
         elif settings.game_map.obstacles_map[yposition_matrix][(xposition_matrix-1)]!=0:
-            if self.get_obstacle((yposition_matrix),xposition_matrix-1).fruit=="obstacle":
-                self.contact_dict["left"]="obstacle"
-            else:    
-                self.contact_dict["left"]=self.get_obstacle((yposition_matrix),xposition_matrix-1)
+            self.contact_dict["left"]=self.get_obstacle((yposition_matrix),xposition_matrix-1)
     
     def get_obstacle(self,xposition,yposition):
         reference=int(settings.game_map.obstacles_map[xposition][yposition])
@@ -189,9 +183,12 @@ class Bot(Player):
         self.direction.y = 0
         # Enter options
         possibilities=[]
-        if "cherry" in [element if type(element)==str else element.fruit for element in self.contact_dict.values()]:
-            self.pick()
-        else:
+        pick_flag = False
+        for obstacle in self.contact_dict.values():
+            if (type(obstacle) is CherryTree) and (obstacle.fruit == "cherry"):
+                 self.pick_cherry(obstacle)
+                 pick_flag= True
+        if not pick_flag:
             if not self.contact_dict["up"]:
                 possibilities.append("up")
             if not self.contact_dict["down"]:
