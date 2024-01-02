@@ -29,7 +29,7 @@ class GameMap:
         self.map_width = 30
         self.map_height=10
         self.number_of_cherries=15
-        self.number_of_rock=9
+        self.number_of_rock=3
         self.tile_size = 32 
         self.occupied_tiles = []
         self.player_tiles = []
@@ -37,7 +37,8 @@ class GameMap:
 
     def __generate_rocks(self, num):
         rock_concat = 3
-        for rock_block_idx in range(0,num,rock_concat):
+        rock_block_idx = 0
+        while rock_block_idx < num * rock_concat:
             x=random.randint(0,self.map_width-1)
             y=random.randint(0,self.map_height-2) # Trees occupy two vertical tiles
             pair=[y,x]
@@ -57,19 +58,21 @@ class GameMap:
                 self.obstacles_map[y,x] = rock_block_idx+1  | ROCK_HANDLER
                 self.obstacles_map[y,x-1] = rock_block_idx+2 | ROCK_HANDLER
                 self.obstacles_map[y,x+1] = rock_block_idx+3 | ROCK_HANDLER
-            else: # in case of overlap, we retry in the next iteration
-                rock_block_idx-=1
+                rock_block_idx += rock_concat
+            # in case of overlap, we retry in the next iteration
 
     def __generate_trees(self, num):
-        for cherry_idx in range(num):
+        cherry_idx = 0
+        while cherry_idx < num:
             x=random.randint(0,self.map_width-1)
             y=random.randint(0,self.map_height-2) # Trees occupy two vertical tiles
             pair=[y,x]
-            if self.players_map[y,x] == 0 and pair not in self.occupied_tiles:
+            if ((self.players_map[y,x] == 0) and 
+                (pair not in self.occupied_tiles)):
                 self.occupied_tiles.append(pair)
                 self.obstacles_map[y,x] = cherry_idx+1 | TREE_HANDLER
-            else: # in case of overlap, we retry in the next iteration
-                cherry_idx-=1
+                cherry_idx+=1
+            # in case of overlap, we retry in the next iteration
                 
     def random_map(self):
         #layer0=terrain,layer1=player1,layer2=bot
