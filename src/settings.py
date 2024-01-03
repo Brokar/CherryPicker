@@ -5,10 +5,8 @@ import random as random
 
 class GameStates():
     GAME_OVER = 0
-    PLAYER = "player"
-    MOVING = 1
-    AI = 2
-    PAUSED= 3
+    PLAYING = 1
+    PAUSED= 2
 
 
 class TypePlayer():
@@ -80,7 +78,6 @@ class GameMap:
                 self.obstacles_map[y,x] = cherry_idx+1 | TREE_HANDLER
                 cherry_idx+=1
             # in case of overlap, we retry in the next iteration
-                
     def random_map(self):
         #layer0=terrain,layer1=player1,layer2=bot
         self.obstacles_map = np.zeros((self.map_height,self.map_width), dtype=int)

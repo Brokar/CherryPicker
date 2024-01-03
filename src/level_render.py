@@ -24,7 +24,8 @@ class LevelRender:
         self.obstacle_sprites = pygame.sprite.Group()
         self.player_references = []
         self.adversaries = []
-        self.state = GameStates.PLAYER     
+        self.pause_request = False
+        self.state = GameStates.PLAYING     
         self.obstacle_sprite_table = {}
         self.init_map(game_map)
         # user interface 
@@ -60,17 +61,44 @@ class LevelRender:
         if keys[pygame.K_ESCAPE] or keys[pygame.K_RETURN]: 
             if not self.k_space_is_press:
                 if keys[pygame.K_ESCAPE]:
-                    if self.state == settings.GameStates.PLAYER:
-                        self.state = settings.GameStates.PAUSED
-                        print("State: PAUSED")
-                    else:
-                        self.state = settings.GameStates.PLAYER
+                    self.pause_request = True
                 if keys[pygame.K_RETURN]:
-                    self.state = settings.GameStates.PLAYER
-                    print("State: PLAYER")
+                    self.state = settings.GameStates.PLAYING
                 self.k_space_is_press=True
         else:
             self.k_space_is_press=False
+    def is_winner(self):
+        """
+        Calculate if there is a winner.
+        Winning condition:
+            - Having more charries than anyone
+            - Left cherries less than second with most
+        """
+        total_picked_cherries = self.player.picked_cherries
+        current_podium = [self.player]
+        for adversary in self.adversaries:
+            total_picked_cherries += adversary.picked_cherries
+            current_podium.append(adversary)
+        current_podium.sort(key=lambda x: x.picked_cherries, reverse=True)
+        left_cherries = settings.game_map.number_of_cherries - total_picked_cherries
+        if(current_podium[0].picked_cherries > 
+           (current_podium[1].picked_cherries + left_cherries) ):
+            print("Player {} won wiht {} cherries".format(current_podium[0].player_id, current_podium[0].picked_cherries))
+            return True 
+
+        return False
+    def update_state(self):
+        if(self.state == settings.GameStates.GAME_OVER):
+            pass
+        elif(self.is_winner()):
+            self.state = settings.GameStates.GAME_OVER
+        elif(self.pause_request):
+            if self.state == settings.GameStates.PLAYING:
+                self.state = settings.GameStates.PAUSED 
+            else:
+                self.state = settings.GameStates.PLAYING
+            self.pause_request = False
+
 
     def update_map(self):
         # TODO: define game stages. 
@@ -79,17 +107,22 @@ class LevelRender:
         # 3. AI turn
         # 4. Other stuff in the map
         # Updating all visable sprites, including user and background
-        self.background_tiles.update()
-        self.visible_sprites.update()
-        self.input()
-        self.background_tiles.custom_draw(self.player)
-        self.visible_sprites.custom_draw(self.player)
+        if (self.state is not settings.GameStates.PAUSED or
+            self.state is not settings.GameStates.GAME_OVER):
+            self.background_tiles.update()
+            self.visible_sprites.update()
+            self.input()
+            self.background_tiles.custom_draw(self.player)
+            self.visible_sprites.custom_draw(self.player)
+            # Refresh stamina
+            if self.player.stamina == 0:
+                self.adversaries[0].restore_stamina()
+                self.player.restore_stamina()
+            self.update_state()            
         # Update main manu and counter
         self.ui.display(self.player, self.state)
-        # Refresh stamina
-        if self.player.stamina == 0:
-            self.adversaries[0].restore_stamina()
-            self.player.restore_stamina()
+
+        
         # if self.state == settings.GameStates.PLAYER:
         # debug(str(f"{self.state}"))
         #     self.visible_sprites.update()

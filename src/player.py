@@ -102,7 +102,7 @@ class Player(pygame.sprite.Sprite):
             full_path = path.join(self.character_path,animation)
             self.animations[animation] = import_folder(full_path)
 
-    def get_status(self):
+    def update_animation_status(self):
         # Idle Status
         if self.direction.x == 0 and self.direction.y == 0:
             if not "idle" in self.status:
@@ -157,7 +157,7 @@ class Player(pygame.sprite.Sprite):
         if self.stamina > 0:
             self.contact()
             self.input()
-            self.get_status()
+            self.update_animation_status()
             self.animate()
             self.move()
 
