@@ -22,11 +22,14 @@ FPS = 60
 ROCK_HANDLER = (0x524F0000)
 TREE_HANDLER = (0x54520000)
 HANDLER_MASK = 0xFFFF0000
+TREE_EMPTY  = (0x454D0000)
 # ui 
 UI_FONT_SIZE = 18
 UI_CHERRY_POSITION = 10
 UI_CHERRY_WIDTH = 100
 UI_CHERRY_HEIGHT = 20
+
+LOGS_DIR = "logs"
 class GameMap:
     def __init__(self, screen_width, screen_height):
         self.screen_width = screen_width

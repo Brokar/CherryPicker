@@ -1,26 +1,38 @@
 from os import path
 import pygame 
 import settings
-
-class CherryTree(pygame.sprite.Sprite):
-    def __init__(self,pos,groups, tree_id):
+class Obstacle(pygame.sprite.Sprite):
+    def __init__(self,pos,groups,obstacle_id):
         super().__init__(groups)
+        self.pos = pos
+        self.obs_id = obstacle_id
+        self.fruit = "obstacle"
+    def get_type(self):
+        handler = self.obs_id & settings.HANDLER_MASK 
+        if handler ==  settings.TREE_HANDLER:
+            return settings.TREE_HANDLER if self.fruit == "cherry" else settings.TREE_EMPTY
+        elif handler == settings.ROCK_HANDLER:
+            return settings.ROCK_HANDLER
+        else:
+            return 0
+
+class CherryTree(Obstacle):
+    def __init__(self,pos,groups, tree_id):
+        super().__init__(pos,groups, tree_id)
         self.image = pygame.image.load(path.join("..", "tiles","fullbush.png")).convert_alpha()
         self.rect = self.image.get_rect(topleft = pos)
         # Get the display surface
-        self.tree_id = tree_id
         self.fruit = "cherry"  
     def empty_tree(self):
         self.fruit = "empty"
         self.image = pygame.image.load(path.join("..","tiles","emptybush.png")).convert_alpha()
 
-class Rock(pygame.sprite.Sprite):
-    def __init__(self,pos,groups, tree_id):
-        super().__init__(groups)
+class Rock(Obstacle):
+    def __init__(self,pos,groups, rock_id):
+        super().__init__(pos,groups,rock_id)
         self.image = pygame.image.load(path.join("..", "tiles","rock.png")).convert_alpha()
         self.rect = self.image.get_rect(topleft = pos)
         # Get the display surface
-        self.tree_id = tree_id
         self.fruit = "obstacle"      
 
 

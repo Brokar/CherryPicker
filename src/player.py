@@ -86,8 +86,8 @@ class Player(pygame.sprite.Sprite):
 
 
     def pick_cherry(self, cherry_obj):
-            self.basket_content.append(self.obstacle_sprite_table[cherry_obj.tree_id])
-            self.obstacle_sprite_table[cherry_obj.tree_id].empty_tree()
+            self.basket_content.append(self.obstacle_sprite_table[cherry_obj.obs_id])
+            self.obstacle_sprite_table[cherry_obj.obs_id].empty_tree()
             self.picked_cherries += 1
 
     def get_cherries(self):

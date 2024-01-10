@@ -14,7 +14,7 @@ class Game:
         self.screen = pygame.display.set_mode((settings.game_map.screen_width-5, settings.game_map.screen_height-20))
         self.clock = pygame.time.Clock()
         # Initialize the rendering class
-        self.level = LevelRender(settings.game_map)
+        self.level = LevelRender(settings.game_map, vervose=1)
         pygame.display.set_caption('CherryPicker')
     def run(self):
         while True:
@@ -26,6 +26,7 @@ class Game:
             self.level.update_map()
             pygame.display.update()
             self.clock.tick(settings.FPS)
+            print(self.clock.get_fps(), end='\r', flush=True)
 if __name__ == '__main__':
     game = Game()
     game.run()
