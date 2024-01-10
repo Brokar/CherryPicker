@@ -4,9 +4,10 @@ import numpy as np
 import random as random
 
 class GameStates():
-    PLAYER = "player"
-    MOVING = 1
-    AI = 2
+    GAME_OVER = 0
+    PLAYING = 1
+    PAUSED= 2
+
 
 class TypePlayer():
     PLAYER = 1
@@ -21,7 +22,14 @@ FPS = 60
 ROCK_HANDLER = (0x524F0000)
 TREE_HANDLER = (0x54520000)
 HANDLER_MASK = 0xFFFF0000
+TREE_EMPTY  = (0x454D0000)
+# ui 
+UI_FONT_SIZE = 18
+UI_CHERRY_POSITION = 10
+UI_CHERRY_WIDTH = 100
+UI_CHERRY_HEIGHT = 20
 
+LOGS_DIR = "logs"
 class GameMap:
     def __init__(self, screen_width, screen_height):
         self.screen_width = screen_width
@@ -29,23 +37,26 @@ class GameMap:
         self.map_width = 30
         self.map_height=10
         self.number_of_cherries=15
-        self.number_of_rock=9
+        self.number_of_rock=3
         self.tile_size = 32 
         self.occupied_tiles = []
+        self.player_tiles = []
         self.random_map()
 
     def __generate_rocks(self, num):
         rock_concat = 3
-        self.occupied_tiles=[]
-        for rock_block_idx in range(0,num,rock_concat):
+        rock_block_idx = 0
+        while rock_block_idx < num * rock_concat:
             x=random.randint(0,self.map_width-1)
             y=random.randint(0,self.map_height-2) # Trees occupy two vertical tiles
             pair=[y,x]
             pairbefore=[y,x-1]
             pairafter=[y,x+1]
-            if (self.players_map[y,x] == 0 and 
+            if ((pair not in self.player_tiles) and 
                 (pair not in self.occupied_tiles) and 
+                (pairbefore not in self.player_tiles) and
                 (pairbefore not in self.occupied_tiles) and 
+                (pairafter not in self.player_tiles) and
                 (pairafter not in self.occupied_tiles) 
                 and ((x+1) < (self.map_width))):
                 self.occupied_tiles.append(pair)
@@ -55,20 +66,21 @@ class GameMap:
                 self.obstacles_map[y,x] = rock_block_idx+1  | ROCK_HANDLER
                 self.obstacles_map[y,x-1] = rock_block_idx+2 | ROCK_HANDLER
                 self.obstacles_map[y,x+1] = rock_block_idx+3 | ROCK_HANDLER
-            else: # in case of overlap, we retry in the next iteration
-                rock_block_idx-=1
+                rock_block_idx += rock_concat
+            # in case of overlap, we retry in the next iteration
 
     def __generate_trees(self, num):
-        for cherry_idx in range(num):
+        cherry_idx = 0
+        while cherry_idx < num:
             x=random.randint(0,self.map_width-1)
             y=random.randint(0,self.map_height-2) # Trees occupy two vertical tiles
             pair=[y,x]
-            if self.players_map[y,x] == 0 and pair not in self.occupied_tiles:
+            if ((self.players_map[y,x] == 0) and 
+                (pair not in self.occupied_tiles)):
                 self.occupied_tiles.append(pair)
                 self.obstacles_map[y,x] = cherry_idx+1 | TREE_HANDLER
-            else: # in case of overlap, we retry in the next iteration
-                cherry_idx-=1
-                
+                cherry_idx+=1
+            # in case of overlap, we retry in the next iteration
     def random_map(self):
         #layer0=terrain,layer1=player1,layer2=bot
         self.obstacles_map = np.zeros((self.map_height,self.map_width), dtype=int)
@@ -84,12 +96,16 @@ class GameMap:
         middle_width = int(self.map_width/2)
         middle_height = int(self.map_height/2)
         players_map[0,middle_width] = TypePlayer.PLAYER
+        self.player_tiles.append([0,middle_width]) 
         players_map[-1,middle_width] = TypePlayer.BOT_1
+        self.player_tiles.append([-1,middle_width]) 
         if(num_adv == 2):
             players_map[middle_height, 0] = TypePlayer.BOT_2
+            self.player_tiles.append([middle_height, 0]) 
         if(num_adv == 3):
             players_map[middle_height, -1] = TypePlayer.BOT_3
-        
+            self.player_tiles.append([middle_height, -1]) 
+         
 
 
 def init(width, height):
